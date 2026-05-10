@@ -1,0 +1,4 @@
+baseURL = 'https://homestacklab.fr/'
+locale = 'fr-FR'
+title = 'HomeStackLab - Build and Forget'
+theme = 'PaperMod'
