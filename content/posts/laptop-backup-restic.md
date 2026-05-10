@@ -2,7 +2,7 @@
 title = 'Comment j’automatise la sauvegarde de l’ordinateur portable de Madame'
 #title = 'How to backup your wife’s Windows powered laptop with restic'
 date = '2026-05-10T18:54:45+02:00'
-draft = false
+draft = true
 +++
 
 Ma femme utilise un ordinateur portable sous Windows. Pour elle, l’utilisation
