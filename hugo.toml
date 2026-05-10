@@ -2,3 +2,11 @@ baseURL = 'https://homestacklab.fr/'
 locale = 'fr-FR'
 title = 'HomeStackLab - Build and Forget'
 theme = 'PaperMod'
+
+[frontmatter]
+lastmod = [":git", "lastmod", "date", "publishDate"]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
