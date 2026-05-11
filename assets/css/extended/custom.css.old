@@ -7,40 +7,31 @@
     justify-content: center;
 }
 
-/* ---- AGRANDISSEMENT DU TITRE / DESCRIPTION ---- */
+/* ---- AGRANDISSEMENT DU TITRE ---- */
 .first-entry.home-info h1 {
     font-size: 3.2rem;  /* D'origine autour de 2.5rem - Tu peux tester 3.5rem si tu veux encore plus gros */
     font-weight: 500;   /* Donne un peu plus d'impact au titre */
     margin-bottom: 1rem; /* Donne un peu d'air entre le titre et le texte */
 }
 
+/* ---- AGRANDISSEMENT DE LA DESCRIPTION ---- */
 .first-entry.home-info .entry-content {
     font-size: 1.2rem;  /* D'origine autour de 1.0rem */
     line-height: 1.6;   /* Améliore la lisibilité avec un interligne plus aéré */
 }
 
-
 /* ---- COLORS ---- */
-
-/* 1. Thème clair par défaut (et forcé) */
-:root,
-html[data-theme="light"] {
-    --accent: rgb(52, 109, 122); /* Bleu/Vert */
+:root {
+    --accent: rgb(52, 109, 122);
 }
 
-/* 2. Thème sombre : Choix système automatique OU Switch manuel */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --accent: rgb(108, 170, 184);
-    }
-}
-/* 3. Force le switch manuel */
-html[data-theme="dark"] {
+/* body.dark {
     --accent: rgb(108, 170, 184);
+} */
+body.dark {
+    --accent: rgb(156, 104, 68);
 }
 
-
-/* ---- APPLICATION DES COULEURS ---- */
 
 /* liens */
 a {
