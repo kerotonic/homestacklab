@@ -1,6 +1,6 @@
 baseURL = 'https://homestacklab.fr/'
 locale = 'fr-FR'
-title = 'HomeStackLab - Build and Forget'
+title = 'HomeStackLab'
 theme = 'PaperMod'
 
 [frontmatter]
@@ -10,3 +10,28 @@ lastmod = [":git", "lastmod", "date", "publishDate"]
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+
+# ---- NAVIGATION ----
+[[menu.main]]
+  name = "Articles"
+  url = "/posts/"
+  weight = 10
+[[menu.main]]
+  name = "Tags"
+  url = "/tags/"
+  weight = 20
+
+# ---- PAPERMOD THEME ----
+[params]
+defaultTheme = "auto"
+ShowReadingTime = true
+ShowShareButtons = true
+ShowBreadCrumbs = true
+ShowCodeCopyButtons = true
+ShowPostNavLinks = false
+showThemeToggle = true
+  [params.homeInfoParams]
+    Title = "Build and Forget."
+    Content = """Pour ceux qui aiment construire des architectures solides, puis les oublier.<br>
+    Linux, réseau, domotique et auto-hébergement.
+    """
