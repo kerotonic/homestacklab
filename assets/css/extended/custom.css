@@ -22,19 +22,28 @@
 
 /* ---- COLORS ---- */
 
-/* 1. Thème clair par défaut (et forcé) */
-:root,
-html[data-theme="light"] {
-    --accent: rgb(52, 109, 122); /* Bleu/Vert */
+/* ---- MODE AUTO : THÈME CLAIR SYSTÈME ---- */
+/* Couleur utilisée lorsque le navigateur/système est en thème clair */
+:root {
+    --accent: rgb(52, 109, 122);
 }
 
-/* 2. Thème sombre : Choix système automatique OU Switch manuel */
+/* ---- MODE AUTO : THÈME SOMBRE SYSTÈME ---- */
+/* Override automatique lorsque le système préfère le thème sombre */
 @media (prefers-color-scheme: dark) {
     :root {
         --accent: rgb(108, 170, 184);
     }
 }
-/* 3. Force le switch manuel */
+
+/* ---- SWITCH MANUEL PAPERMOD : THÈME CLAIR ---- */
+/* Prioritaire lorsque l'utilisateur force explicitement le thème clair */
+html[data-theme="light"] {
+    --accent: rgb(52, 109, 122);
+}
+
+/* ---- SWITCH MANUEL PAPERMOD : THÈME SOMBRE ---- */
+/* Prioritaire lorsque l'utilisateur force explicitement le thème sombre */
 html[data-theme="dark"] {
     --accent: rgb(108, 170, 184);
 }
