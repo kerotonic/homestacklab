@@ -5,6 +5,8 @@ date = '2026-05-10T18:54:45+02:00'
 draft = true
 +++
 
+# Mon article
+
 Ma femme utilise un ordinateur portable sous Windows. Pour elle, l’utilisation
 de cet outil doit se limiter au strict minimum (elle préfère, de très loin, son
 smartphone). Autant dire que mes encouragements à mettre en place une procédure
@@ -29,3 +31,19 @@ I) Stratégie de backup
 
 Tout d’abord, on va rappeler une règle basique de la sauvegarde personnelle.
 Idéalement, un système de backup sérieux doit suivre la règle des 3-2-1...
+
+## Introduction
+
+Bla bla
+
+## Installation
+
+Bla bla
+
+### SSH
+
+### Restic
+
+## Automatisation
+
+## Conclusion
