@@ -1,25 +1,25 @@
-baseURL = 'https://homestacklab.fr/'
-locale = 'fr-FR'
-title = 'HomeStackLab'
-theme = 'PaperMod'
+baseURL = "https://homestacklab.fr/"
+locale = "fr-FR"
+title = "HomeStackLab"
+theme = "PaperMod"
 
+# ---- FRONTMATTER ----
 [frontmatter]
 lastmod = [":git", "lastmod", "date", "publishDate"]
 
-[markup]
-  [markup.goldmark]
-    [markup.goldmark.renderer]
-      unsafe = true
+# ---- MARKDOWN / GOLDMARK ----
+[markup.goldmark.renderer]
+unsafe = true
 
 # ---- NAVIGATION ----
 [[menu.main]]
-  name = "Articles"
-  url = "/posts/"
-  weight = 10
+name = "Articles"
+url = "/posts/"
+weight = 10
 [[menu.main]]
-  name = "Tags"
-  url = "/tags/"
-  weight = 20
+name = "Tags"
+url = "/tags/"
+weight = 20
 
 # ---- PAPERMOD THEME ----
 [params]
@@ -30,8 +30,9 @@ ShowBreadCrumbs = true
 ShowCodeCopyButtons = true
 ShowPostNavLinks = false
 showThemeToggle = true
-  [params.homeInfoParams]
-    Title = "Build and Forget."
-    Content = """Pour ceux qui aiment construire des architectures solides, puis les oublier.<br>
-    Linux, réseau, domotique et auto-hébergement.
-    """
+[params.homeInfoParams]
+Title = "Build and Forget."
+Content = """
+Pour ceux qui aiment construire des architectures solides, puis les oublier.<br>
+Linux, réseau, domotique et auto-hébergement.
+"""

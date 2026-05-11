@@ -9,26 +9,26 @@
 
 /* ---- AGRANDISSEMENT DU TITRE / DESCRIPTION ---- */
 .first-entry.home-info h1 {
-    font-size: 3.2rem;  /* D'origine autour de 2.5rem - Tu peux tester 3.5rem si tu veux encore plus gros */
-    font-weight: 500;   /* Donne un peu plus d'impact au titre */
-    margin-bottom: 1rem; /* Donne un peu d'air entre le titre et le texte */
+    font-size: 3.2rem;   /* taille de police */
+    font-weight: 500;    /* épaisseur de police */
+    margin-bottom: 1rem; /* espace sous texte */
 }
 
 .first-entry.home-info .entry-content {
-    font-size: 1.2rem;  /* D'origine autour de 1.0rem */
-    line-height: 1.6;   /* Améliore la lisibilité avec un interligne plus aéré */
+    font-size: 1.2rem;  /* taille de police */
+    line-height: 1.6;   /* interligne */
 }
 
 
-/* ---- COLORS ---- */
+/* ---- COULEURS ---- */
 
-/* ---- MODE AUTO : THÈME CLAIR SYSTÈME ---- */
+/* ---- Mode auto : thème clair système ---- */
 /* Couleur utilisée lorsque le navigateur/système est en thème clair */
 :root {
     --accent: rgb(52, 109, 122);
 }
 
-/* ---- MODE AUTO : THÈME SOMBRE SYSTÈME ---- */
+/* ---- Mode auto : thème sombre système ---- */
 /* Override automatique lorsque le système préfère le thème sombre */
 @media (prefers-color-scheme: dark) {
     :root {
@@ -36,13 +36,13 @@
     }
 }
 
-/* ---- SWITCH MANUEL PAPERMOD : THÈME CLAIR ---- */
+/* ---- Switch manuel papermod : thème clair ---- */
 /* Prioritaire lorsque l'utilisateur force explicitement le thème clair */
 html[data-theme="light"] {
     --accent: rgb(52, 109, 122);
 }
 
-/* ---- SWITCH MANUEL PAPERMOD : THÈME SOMBRE ---- */
+/* ---- Switch manuel papermod : thème sombre ---- */
 /* Prioritaire lorsque l'utilisateur force explicitement le thème sombre */
 html[data-theme="dark"] {
     --accent: rgb(108, 170, 184);
@@ -51,23 +51,23 @@ html[data-theme="dark"] {
 
 /* ---- APPLICATION DES COULEURS ---- */
 
-/* liens */
+/* Liens */
 a {
     color: var(--accent);
 }
 
-/* hover du menu */
+/* Hover du menu */
 .logo a:hover,
 #menu a:hover {
     color: var(--accent);
 }
 
-/* titre hero */
+/* Titre hero */
 .first-entry .entry-header h1 {
     color: var(--accent);
 }
 
-/* tags */
+/* Tags */
 .post-tags a:hover {
     background: var(--accent);
 }
