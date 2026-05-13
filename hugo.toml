@@ -38,25 +38,25 @@ url = "/tags/"
 weight = 50
 
 # ---- PAPERMOD THEME ----
-[params]
-defaultTheme = "auto"
-mainSections = ["system", "network", "services", "smarthome"] 
-hideSummary = true
-ShowReadingTime = true
-ShowShareButtons = true
-ShowBreadCrumbs = true
-ShowCodeCopyButtons = true
-ShowPostNavLinks = false
-showThemeToggle = true
-ShowToc = true
-TocOpen = true
-[params.homeInfoParams]
-Title = "Build and Forget."
-Content = """
-Pour ceux qui aiment construire des architectures solides, puis les oublier.<br>
-Des solutions vécues, testées et éprouvées pour la maison :<br>
-<a href="/system/">systèmes</a>,
-<a href="/network/">réseau</a>,
-<a href="/services/">services</a>
-et <a href="/smarthome/">domotique</a>.
-"""
+# [params]
+# defaultTheme = "auto"
+# mainSections = ["system", "network", "services", "smarthome"] 
+# hideSummary = true
+# ShowReadingTime = true
+# ShowShareButtons = true
+# ShowBreadCrumbs = true
+# ShowCodeCopyButtons = true
+# ShowPostNavLinks = false
+# showThemeToggle = true
+# ShowToc = true
+# TocOpen = true
+# [params.homeInfoParams]
+# Title = "Build and Forget."
+# Content = """
+# Pour ceux qui aiment construire des architectures solides, puis les oublier.<br>
+# Des solutions vécues, testées et éprouvées pour la maison :<br>
+# <a href="/system/">systèmes</a>,
+# <a href="/network/">réseau</a>,
+# <a href="/services/">services</a>
+# et <a href="/smarthome/">domotique</a>.
+# """
