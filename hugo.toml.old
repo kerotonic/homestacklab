@@ -1,7 +1,7 @@
 baseURL = "https://homestacklab.fr/"
 locale = "fr-FR"
 title = "HomeStackLab"
-theme = "PaperMod"
+theme = "blowfish"
 
 # ---- FRONTMATTER ----
 [frontmatter]
