@@ -11,30 +11,30 @@
 # ordered by weight from lowest to highest.
 
 [[main]]
-  name = "Categories"
+  name = "Catégories"
   weight = 10
 
 [[main]]
-  name = "Systems"
-  parent = "Categories"
+  name = "Systèmes"
+  parent = "Catégories"
   pageRef = "system"
   weight = 1
 
 [[main]]
-  name = "Network"
-  parent = "Categories"
+  name = "Réseau"
+  parent = "Catégories"
   pageRef = "network"
   weight = 2
 
 [[main]]
   name = "Services"
-  parent = "Categories"
+  parent = "Catégories"
   pageRef = "services"
   weight = 3
 
 [[main]]
-  name = "Smarthome"
-  parent = "Categories"
+  name = "Domotique"
+  parent = "Catégories"
   pageRef = "smarthome"
   weight = 4
 
@@ -49,7 +49,7 @@
   weight = 30
 
 [[main]]
-  name = "About"
+  name = "Taulier"
   pageRef = "about"
   weight = 40
 

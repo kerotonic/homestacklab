@@ -1,7 +1,32 @@
+/* CUSTOM COLORS */
 body {
   background-color: #f5f5f5;
 }
 
 .dark body {
   background-color: #1d1e20;
+}
+
+.brand-accent {
+  color: rgb(var(--color-primary-600));
+}
+
+.dark .brand-accent {
+  color: rgb(var(--color-primary-400));
+}
+
+/* Titre du site dans le header */
+.main-menu > a:first-child {
+  color: rgb(var(--color-primary-600));
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.dark .main-menu > a:first-child {
+  color: rgb(var(--color-primary-400));
+}
+
+
+.article-content {
+  max-width: min(100%, 80ch) !important;
 }

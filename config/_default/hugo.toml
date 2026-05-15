@@ -3,10 +3,8 @@
 # https://blowfish.page/docs/getting-started/
 
 baseURL = "https://homestacklab.fr/"
-#title = "HomeStackLab"
-defaultContentLanguage = "en"
-#defaultContentLanguage = "fr"
-#locale = "fr_FR"
+title = "HomeStackLab"
+defaultContentLanguage = "fr"
 theme = "blowfish"
 
 # pluralizeListTitles = "true" # hugo function useful for non-english languages, find out more in  https://gohugo.io/getting-started/configuration/#pluralizelisttitles
@@ -21,6 +19,9 @@ enableEmoji = true
 
 # googleAnalytics = "G-XXXXXXXXX"
 
+[frontmatter]
+  lastmod = [":git", "lastmod", "date", "publishDate"]
+
 [pagination]
   pagerSize = 100
 
@@ -29,9 +30,9 @@ enableEmoji = true
 
 [taxonomies]
   tag = "tags"
-  category = "categories"
-  author = "authors"
-  series = "series"
+  # category = "categories"
+  # author = "authors"
+  # series = "series"
 
 [sitemap]
   changefreq = 'daily'
@@ -44,29 +45,30 @@ enableEmoji = true
 [related]
   threshold = 0
   toLower = false
-
     [[related.indices]]
         name = "tags"
         weight = 100
-
     [[related.indices]]
         name = "categories"
         weight = 100
-
     [[related.indices]]
         name = "series"
         weight = 50
-
     [[related.indices]]
         name = "authors"
         weight = 20
-
     [[related.indices]]
         name = "date"
         weight = 10
-
     [[related.indices]]
       applyFilter = false
       name = 'fragmentrefs'
       type = 'fragments'
       weight = 10
+
+[markup]
+  [markup.highlight]
+    lineNos = true
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true

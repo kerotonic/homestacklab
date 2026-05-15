@@ -1,8 +1,10 @@
 +++
-title = 'Comment j’automatise la sauvegarde de l’ordinateur portable de Madame'
-#title = 'How to backup your wife’s Windows powered laptop with restic'
-date = '2026-05-10T18:54:45+02:00'
+title = "Comment j’automatise la sauvegarde de l’ordinateur portable de Madame"
+#title = "How to backup your wife’s Windows powered laptop with restic"
+date = "2026-05-10T18:54:45+02:00"
 draft = true
+tags = ["restic", "backup", "windows"]
+categories = ["system", "network"]
 +++
 
 # Mon article
@@ -35,6 +37,37 @@ Idéalement, un système de backup sérieux doit suivre la règle des 3-2-1...
 ## Introduction
 
 Bla bla
+
+```bash
+#############
+# Functions #
+#############
+
+# start app function
+start_app()
+{
+    # keep trace of windows list before launching a new app
+    list_before=$(wmctrl -l)
+    # populate an array containing all ids
+    declare -a win_ids
+    while read i; do
+        win_ids+=($(echo $i | awk '{print $1}'))
+    done < <(echo "$list_before")
+
+    # launch app
+    if [ "$2" = "null" ]; then $1 2>&1 1>/dev/null &
+    else $1 $2 2>&1 1>/dev/null & fi
+
+    # extract app_id from wmctrl
+    local app_id
+    while [ -z $app_id ]; do
+        while read i; do
+            if [ $(echo $i | awk '{print $1}') != ">" ]; then continue; fi
+            if [ $1 = "xfce4-terminal" ] && \
+                [ -z "$(echo $i | grep "Terminal")" ]; then continue
+            if [ $(echo $i | awk '{print $1}') != ">" ]; then continue; fieeeeee
+[...]
+```
 
 ## Installation
 
