@@ -11,8 +11,9 @@ title: ""
   </h1>
 
   <p style="font-size: 1.1rem">
-  Pour ceux qui aiment construire des architectures solides, puis les oublier.<br>
-  Des solutions vécues, testées et éprouvées pour la maison :<br>
+  HomeStackLab est un laboratoire technique personnel consacré à la construction<br>
+  d’une infrastructure numérique familiale fiable, maintenable et pensée pour durer.<br>
+  Ici, je documente mes solutions utilisées au quotidien :<br>
   <a href="/system/" style="text-decoration: underline;
   text-underline-offset: 0.15em;">systèmes</a>,
   <a href="/network/" style="text-decoration: underline;
