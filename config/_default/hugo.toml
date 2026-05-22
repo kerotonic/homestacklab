@@ -19,9 +19,6 @@ enableEmoji = true
 
 # googleAnalytics = "G-XXXXXXXXX"
 
-[frontmatter]
-  lastmod = [":git", "lastmod", "date", "publishDate"]
-
 [pagination]
   pagerSize = 100
 
@@ -67,8 +64,6 @@ enableEmoji = true
       weight = 10
 
 [markup]
-  [markup.highlight]
-    lineNos = true
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true

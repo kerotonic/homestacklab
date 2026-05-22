@@ -30,3 +30,20 @@ body {
 .article-content {
   max-width: min(100%, 80ch) !important;
 }
+
+/* Listes */
+
+/* Niveau 1 : Disque plein */
+.prose ul {
+    list-style-type: disc;
+}
+
+/* Niveau 2 : Cercle creux */
+.prose ul ul {
+    list-style-type: circle;
+}
+
+/* Niveau 3 : Carré plein */
+.prose ul ul ul {
+    list-style-type: square;
+}
