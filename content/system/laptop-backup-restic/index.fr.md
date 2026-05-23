@@ -5,7 +5,6 @@ date = "2026-05-10"
 lastmod = "2026-05-23"
 draft = false
 tags = ["restic", "backup", "windows"]
-categories = ["system", "network"]
 +++
 
 <!-- TODO/ADDITIONS
