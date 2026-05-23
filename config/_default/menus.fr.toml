@@ -39,6 +39,12 @@
   weight = 4
 
 [[main]]
+  name = "Boîte à outils"
+  parent = "Catégories"
+  pageRef = "toolbox"
+  weight = 5
+
+[[main]]
   name = "Tags"
   pageRef = "tags"
   weight = 20
