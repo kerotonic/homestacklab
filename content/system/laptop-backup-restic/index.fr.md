@@ -4,7 +4,7 @@ title = "Comment j’automatise la sauvegarde de l’ordinateur portable de Mada
 date = "2026-05-10"
 lastmod = "2026-05-23"
 draft = false
-tags = ["restic", "backup", "windows"]
+tags = ["system", "restic", "backup", "windows"]
 +++
 
 <!-- TODO/ADDITIONS

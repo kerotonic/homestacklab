@@ -3,7 +3,7 @@ title = "Glossaire"
 date = "2026-05-23"
 lastmod = "2026-05-24"
 draft = false
-tags = []
+tags = ["toolbox"]
 +++
 
 #### Shell
