@@ -2,7 +2,7 @@
 title = "Comment j’automatise la sauvegarde de l’ordinateur portable de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-05-23"
+lastmod = "2026-05-24"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -133,7 +133,7 @@ Rename-Item -Path ".\restic_0.18.1_windows_amd64.exe" -NewName "restic.exe"
 
 Restic communiquera avec le NAS en passant par une connexion SSH, il faut donc 
 que l’utilisateur Julie ait un accès autorisé. Par ailleurs, il faut que cet 
-accès puisse se faire via une clé SSH (TODO : lien glossaire), ce qui est 
+accès puisse se faire via une [clé SSH](/toolbox/glossary#ssh-clé), ce qui est 
 obligatoire pour automatiser la sauvegarde.
 
 
@@ -183,9 +183,9 @@ simple, mais on préfère ici envisager le cas le plus difficile (et le plus
 sécurisé). Comme on dit, qui peut le plus peut le moins.
 
 Normalement, si on a installé proprement notre NAS et qu’on a déjà activé le 
-service SSH (TODO : lien interne), on dispose d’un autre utilisateur qui a déjà 
-un accès SSH opérationnel et qui a les droits d’administration (on va l’appeler 
-« nico »). C’est lui qui va bosser pour ouvrir l’accès à Julie.
+[service SSH](/toolbox/glossary#ssh-serveur), on dispose d’un autre utilisateur 
+qui a déjà un accès SSH opérationnel et qui a les droits d’administration (on va 
+l’appeler « nico »). C’est lui qui va bosser pour ouvrir l’accès à Julie.
 
 > [!info]- Pour les curieux : suis-je vraiment obligé de passer par un autre utilisateur ? C’est relou…
 > Techniquement non. Mais :
@@ -224,8 +224,8 @@ considérant que sur le NAS, les dossiers `home` se trouvent dans
 $ cd /var/services/homes/Julie/
 $ sudo mkdir -p .ssh
 ```
-- Avec Vim (TODO : lien interne), on crée (ou ouvre, s’il existe déjà) le 
-fichier `authorized_keys` :
+- Avec [Vim](/toolbox/vim-survival-guide), on crée (ou ouvre, s’il existe déjà) 
+le fichier `authorized_keys` :
 ```bash
 $ sudo vim .ssh/authorized_keys
 ```
