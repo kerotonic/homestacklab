@@ -17,7 +17,7 @@ enableStructuredBreadcrumbs = false
 
 replyByEmail = false
 
-mainSections = ["system", "network", "services", "smarthome"]
+mainSections = ["system", "network", "services", "smarthome", "toolbox"]
 # robots = ""
 
 disableImageOptimization = false
