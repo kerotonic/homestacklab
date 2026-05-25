@@ -8,7 +8,6 @@ tags = ["system", "restic", "backup", "windows"]
 +++
 
 <!-- TODO/ADDITIONS
-- initialiser le glossaire + les basic howtos afin d’avoir une base complète
 - poursuivre rédaction : rclone / google drive ?
 - chercher à automatiser mises à jour des outils -->
 
