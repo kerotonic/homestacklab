@@ -1,8 +1,8 @@
 +++
-title = "Comment j’automatise la sauvegarde de l’ordinateur portable de Madame"
+title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-05-24"
+lastmod = "2026-05-29"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -43,7 +43,7 @@ pouvoir (enfin) cesser d’y penser. Je vous présente ici les solutions que j�
 construites.
 
 
-## Stratégie de sauvegarde et logiciels
+## Stratégie et logiciels de sauvegarde
 
 Tout d’abord, on va rappeler une règle basique de la sauvegarde personnelle. 
 Idéalement, un système de backup sérieux doit suivre la règle du « 3-2-1 » : 
@@ -94,14 +94,14 @@ directement depuis le poste de travail avec son éditeur favori (Vim, par
 exemple)
 
 
-## Installation de restic
+## Installation de Restic
 
 Pour installer Restic, on trouve la dernière version sur la page « Releases » du 
 [dépôt GitHub](https://github.com/restic/restic/releases). Dans la dernière 
 release, il faut repérer la section « Assets » et télécharger le fichier nommé 
 `restic_<version>_windows_amd64.zip`.
 
-> [!warning] Attention
+> [!important] Important
 > Pour la suite du document, il faut adapter les noms d’utilisateur, chemins et 
 versions à votre configuration.
 
@@ -282,7 +282,64 @@ Si ça passe, on est bon. On peut initialiser le dépôt restic !
 
 ## Initialisation du dépôt
 
+Il nous faut maintenant initialiser un dépôt Restic afin d’y stocker nos 
+sauvegardes.
+
+1) Depuis notre terminal PowerShell, on commence par créer le dossier qui 
+servira pour le dépôt :
+```powershell
+ssh Julie@nas.lan 'mkdir -p ~/restic-backup'
+```
+
+2) Pour pouvoir agir sur un dépôt, la commande `restic` a besoin de deux choses 
+: l’adresse du dépôt et un mot de passe. Plutôt que fournir ces deux 
+informations à chaque utilisation de `restic`, on peut définir deux variables 
+d’environnement : RESTIC_REPOSITORY pour le dépôt, RESTIC_PASSWORD pour le mot 
+de passe. Le plus pratique est de définir ces deux variables dans un script 
+PowerShell qu’il nous suffira d’exécuter une seule fois au début d’une session 
+pour pouvoir utiliser ensuite `restic` sans nous en soucier. Ce script servira 
+ensuite aussi lors de la phase d’automatisation. On crée donc un script :
+```powershell
+cd $HOME
+micro .restic_env.ps1
+```
+
+3) Dans ce fichier, on copie le code suivant, en veillant à renseigner correctement 
+l’identifiant et l’adresse du serveur, et en choisissant un mot de passe.
+```powershell
+$env:RESTIC_REPOSITORY="sftp:Julie@nas.lan:/home/restic-backup"
+$env:RESTIC_PASSWORD="mot-de-passe-au-choix"
+```
+
+> [!info]- Pour les curieux : pourquoi `/home/restic-backup` au lieu de `/home/Julie/restic-backup` ?
+> Restic accède au dépôt via le protocole SFTP. Sur DSM 7.1.1, le serveur SFTP 
+expose le répertoire personnel de l'utilisateur sous la forme d'un dossier 
+virtuel `/home`. Le chemin `/home/restic-backup` correspond donc au dossier 
+`restic-backup` situé dans le répertoire personnel de Julie.
+
+> [!important] Important
+> Le mot de passe du dépôt Restic est indispensable pour accéder aux sauvegardes.
+> Si vous le perdez, les données du dépôt deviendront irrécupérables.
+
+4) On peut maintenant initialiser le dépôt, en chargeant d’abord notre script :
+```powershell
+. $HOME\.restic_env.ps1
+restic init
+```
+
+
 ## Première sauvegarde
+
+<!--Il est temps maintenant d’effectuer une première sauvegarde des données.
+```
+restic backup C:\Users\Julie
+```
+
+Sanity check
+```
+restic -r sftp:Emilie@nas:/home/Emilie/restic-backup snapshots
+```
+-->
 
 ## Automatisation des backups
 
