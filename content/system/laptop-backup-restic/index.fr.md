@@ -245,7 +245,7 @@ $ sudo chmod 600 .ssh/authorized_keys
 ### Modification de `/etc/passwd` {#etc-passwd-editing}
 
 Par défaut, sur certains NAS Synology (mon DS213j, en tout cas), le fichier 
-/etc/passwd interdit à un utilisateur non administrateur d’avoir accès à un 
+`/etc/passwd` interdit à un utilisateur non administrateur d’avoir accès à un 
 [shell](/toolbox/glossary#shell). Il faut donc modifier ce fichier.
 
 > [!warning] Attention
