@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-05-29"
+lastmod = "2026-05-31"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -96,10 +96,10 @@ exemple)
 
 ## Installation de Restic {#restic-installation-windows}
 
-Pour installer Restic, on trouve la dernière version sur la page « Releases » du 
-[dépôt GitHub](https://github.com/restic/restic/releases). Dans la dernière 
-release, il faut repérer la section « Assets » et télécharger le fichier nommé 
-`restic_<version>_windows_amd64.zip`.
+Pour installer Restic sur Windows, on trouve la dernière version sur la page « 
+Releases » du [dépôt GitHub](https://github.com/restic/restic/releases). Dans la 
+dernière release, il faut repérer la section « Assets » et télécharger le 
+fichier nommé `restic_<version>_windows_amd64.zip`.
 
 > [!important] Important
 > Pour la suite du document, il faut adapter les noms d’utilisateur, chemins et 
@@ -138,8 +138,9 @@ obligatoire pour automatiser la sauvegarde.
 
 ### Création d’une clé SSH {#powershell-ssh-key}
 
-On ouvre un terminal PowerShell depuis la session de Julie, on s’assure qu’on 
-est dans le bon dossier (`C:\Users\julie`) et on génère la clé :
+Pour créer une clé SSH sur le laptop, on ouvre un terminal PowerShell depuis la 
+session de Julie, on s’assure qu’on est dans le bon dossier (`C:\Users\julie`) 
+et on génère la clé :
 ```powershell
 cd $HOME
 ssh-keygen -t ed25519 `
@@ -177,9 +178,10 @@ ssh-ed25519 AAAARNNzaC1lZDI1OTE5AAAAIPGDQJzIiLkq69g6lb+gpsaWL6VOHtqQbUYaePuTDCJG
 ### Installation de la clé publique sur le NAS {#ssh-key-synology}
 
 On part ici du principe que Julie a un compte sans droits administrateur sur le 
-NAS. Si elle avait un compte administrateur, la procédure serait un peu plus 
-simple, mais on préfère ici envisager le cas le plus difficile (et le plus 
-sécurisé). Comme on dit, qui peut le plus peut le moins.
+NAS où on veut installer la clé. Si elle avait un compte administrateur, la 
+procédure serait un peu plus simple, mais on préfère ici envisager le cas le 
+plus difficile (et le plus sécurisé). Comme on dit, qui peut le plus peut le 
+moins.
 
 Normalement, si on a installé proprement notre NAS et qu’on a déjà activé le 
 [service SSH](/toolbox/glossary#ssh-server), on dispose d’un autre utilisateur 
@@ -194,14 +196,14 @@ manière sécurisée interdit, de préférence, la connexion par mot de passe
 inévitable d’utiliser un autre utilisateur ayant déjà un accès, sauf à réactiver 
 temporairement l’authentification par mot de passe.
 > - En plus de cela, par défaut, sur DSM 7.1.1, un utilisateur sans droits 
-d’administration n’a pas accès à un shell, ce qui lui interdit d’ouvrir une 
-session SSH interactive. C’est pourquoi de nombreux tutoriels sur Synology 
-indiquent d’attribuer les droits d’administration à l’utilisateur concerné. 
-Personnellement, je ne souhaite pas donner ces droits à tous les membres de la 
-famille. Une autre solution est alors de modifier manuellement le fichier 
-`/etc/passwd` et d’attribuer un shell à Julie. Il faut donc obligatoirement 
-qu’un autre utilisateur (administrateur) se connecte pour modifier ce fichier au 
-préalable.
+d’administration n’a pas accès à un [shell](/toolbox/glossary#shell), ce qui lui 
+interdit d’ouvrir une session SSH interactive. C’est pourquoi de nombreux 
+tutoriels sur Synology indiquent d’attribuer les droits d’administration à 
+l’utilisateur concerné. Personnellement, je ne souhaite pas donner ces droits à 
+tous les membres de la famille. Une autre solution est alors de modifier 
+manuellement le fichier `/etc/passwd` et d’attribuer un shell à Julie. Il faut 
+donc obligatoirement qu’un autre utilisateur (administrateur) se connecte pour 
+modifier ce fichier au préalable.
 > - Bien sûr, si Julie a un compte administrateur et si le serveur SSH autorise 
 la connexion avec mot de passe, elle peut faire elle-même les manipulations 
 nécessaires. Elle n’aura alors pas besoin de toucher au fichier `/etc/passwd`. 
@@ -241,6 +243,10 @@ $ sudo chmod 600 .ssh/authorized_keys
 
 
 ### Modification de `/etc/passwd` {#etc-passwd-editing}
+
+Par défaut, sur certains NAS Synology (mon DS213j, en tout cas), le fichier 
+/etc/passwd interdit à un utilisateur non administrateur d’avoir accès à un 
+[shell](/toolbox/glossary#shell). Il faut donc modifier ce fichier.
 
 > [!warning] Attention
 > Avant de modifier ce fichier, il vaut mieux en faire une copie 
@@ -282,8 +288,8 @@ Si ça passe, on est bon. On peut initialiser le dépôt restic !
 
 ## Initialisation du dépôt {#restic-repo-init}
 
-Il nous faut maintenant initialiser un dépôt Restic afin d’y stocker nos 
-sauvegardes.
+Il nous faut maintenant initialiser un dépôt Restic sur le NAS afin d’y stocker 
+nos sauvegardes.
 
 1) Depuis notre terminal PowerShell, on commence par créer le dossier qui 
 servira pour le dépôt :
