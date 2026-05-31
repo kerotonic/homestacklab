@@ -6,7 +6,7 @@ draft = false
 tags = ["toolbox"]
 +++
 
-#### Shell
+#### Shell {#shell}
 Le shell est l’interface textuelle qui permet de communiquer avec le système 
 d’exploitation d’une machine. Contrairement à une interface graphique (où l’on 
 clique sur des icônes), le shell attend que l’utilisateur saisisse des commandes 
@@ -21,9 +21,9 @@ ci-dessous :
   alt="Shell example"
 >}}
 
-#### SSH (clé)
+#### SSH (clé) {#ssh-key}
 Une clé SSH est un mécanisme d’authentification permettant de se connecter à un 
-[serveur SSH](#ssh-serveur) sans que celui-ci ne demande de mot de passe. Elle fonctionne 
+[serveur SSH](#ssh-server) sans que celui-ci ne demande de mot de passe. Elle fonctionne 
 avec une paire de clés :
 - une clé privée, conservée secrètement sur votre machine
 - une clé publique, copiée sur le serveur distant
@@ -31,7 +31,7 @@ avec une paire de clés :
 Lors de la connexion, le serveur vérifie que vous possédez bien la clé privée 
 correspondant à la clé publique enregistrée.
 
-#### SSH (serveur)
+#### SSH (serveur) {#ssh-server}
 Un serveur SSH est un programme qui tourne en arrière-plan sur une machine 
 distante (serveur, Raspberry Pi, NAS…) et qui permet à un utilisateur de s’y 
 connecter afin d’exécuter des commandes sur cette machine. Typiquement, une 

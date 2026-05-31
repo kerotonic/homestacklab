@@ -11,7 +11,7 @@ tags = ["toolbox", "vim", "linux"]
 
 > [!note] Note
 > Pour voir immédiatement les principales commandes de survie, c’est [par 
-là](#les-5-commandes-pour-survivre-dans-un-univers-inconnu).
+là](#main-commands).
 
 Vim est un éditeur en mode texte extrêmement populaire dans le monde du libre en 
 raison de sa puissance et de sa polyvalence. Mais son utilisation peut dérouter 
@@ -28,7 +28,7 @@ configuration système. C’est le cas de mon NAS Synology ou de mon routeur
 UCG-Ultra.
 
 
-## Les 5 commandes pour survivre dans un univers inconnu
+## Les 5 commandes pour survivre dans un univers inconnu {#main-commands}
 
 Quand vous ouvrez Vim, que vous êtes perdus parce que vous ne savez pas quoi 
 faire, les commandes suivantes vous permettent d’être immédiatement 
@@ -45,7 +45,7 @@ opérationnel :
 > Les commandes qui commencent par "`:`" s'exécutent en pressant `Entrée`.
 
 
-## Les commandes quand vous vous dites que maintenant, vous n’avez plus peur de rien
+## Les commandes quand vous vous dites que maintenant, vous n’avez plus peur de rien {#beyond-survival}
 
 Une fois le choc initial passé, manipuler un fichier de configuration sera 
 facilité si vous disposez de quelques outils supplémentaires. Voici le package « 
@@ -56,7 +56,7 @@ confort » pour ne pas y passer des heures.
 mode *Commande*.
 
 
-### Pour vous déplacer
+### Pour vous déplacer {#navigation}
 
 Les flèches directionnelles (`←  ↑  →  ↓`) et les touches `Début`, `Fin`, `Page 
 Préc.` et `Page Suiv.` fonctionnent normalement (en mode *Commande* comme en 
@@ -68,7 +68,7 @@ zone d’écriture :
 - `G` : Aller tout à la fin du fichier.
 
 
-### Pour éditer
+### Pour éditer {#editing}
 
 Pour effacer ou corriger proprement, utilisez les touches suivantes :
 - `Retour arrière` (Backspace) : Efface le caractère avant le curseur 
@@ -82,7 +82,7 @@ Pour effacer ou corriger proprement, utilisez les touches suivantes :
 - `Ctrl + r` : Rétablit l'action annulée.
 
 
-### Pour rechercher
+### Pour rechercher {#search}
 
 Pour rechercher un mot, suivez les étapes suivantes :
 1) Tapez `/` puis la chaîne à rechercher (par exemple 
@@ -93,7 +93,7 @@ première occurrence trouvée.
 précédente).
 
 
-### Pour copier-coller
+### Pour copier-coller {#copy-paste}
 
 Dans Vim, le copier-coller est un concept complexe sur lequel on pourrait écrire 
 une thèse de doctorat. Mais cette procédure vous permettra de toujours vous en 
@@ -109,7 +109,7 @@ au début, respectivement).
 le texte sera collé *après* le curseur.
 
 
-### Pour copier-coller en trichant
+### Pour copier-coller en trichant {#clipboard-paste}
 
 Une situation régulière qui se produira est que vous souhaitez coller dans Vim 
 un texte copié en dehors de Vim (typiquement, une ligne de code ou de 

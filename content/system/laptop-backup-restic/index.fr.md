@@ -43,7 +43,7 @@ pouvoir (enfin) cesser d’y penser. Je vous présente ici les solutions que j�
 construites.
 
 
-## Stratégie et logiciels de sauvegarde
+## Stratégie de sauvegarde {#backup-strategy}
 
 Tout d’abord, on va rappeler une règle basique de la sauvegarde personnelle. 
 Idéalement, un système de backup sérieux doit suivre la règle du « 3-2-1 » : 
@@ -77,7 +77,7 @@ Linux.
 lui permettre d'accéder à Google Drive.
 
 
-## Prérequis
+## Prérequis {#system-prerequisites}
 
 Les prérequis suivants sont nécessaires pour mener à bien la procédure :
 - **Sur le NAS :**
@@ -94,7 +94,7 @@ directement depuis le poste de travail avec son éditeur favori (Vim, par
 exemple)
 
 
-## Installation de Restic
+## Installation de Restic {#restic-installation-windows}
 
 Pour installer Restic, on trouve la dernière version sur la page « Releases » du 
 [dépôt GitHub](https://github.com/restic/restic/releases). Dans la dernière 
@@ -128,15 +128,15 @@ Rename-Item -Path ".\restic_0.18.1_windows_amd64.exe" -NewName "restic.exe"
 ```
 
 
-## Accès SSH au NAS
+## Accès SSH au NAS {#nas-ssh-access}
 
 Restic communiquera avec le NAS en passant par une connexion SSH, il faut donc 
 que l’utilisateur Julie ait un accès autorisé. Par ailleurs, il faut que cet 
-accès puisse se faire via une [clé SSH](/toolbox/glossary#ssh-clé), ce qui est 
+accès puisse se faire via une [clé SSH](/toolbox/glossary#ssh-key), ce qui est 
 obligatoire pour automatiser la sauvegarde.
 
 
-### Création d’une clé SSH
+### Création d’une clé SSH {#powershell-ssh-key}
 
 On ouvre un terminal PowerShell depuis la session de Julie, on s’assure qu’on 
 est dans le bon dossier (`C:\Users\julie`) et on génère la clé :
@@ -174,7 +174,7 @@ ssh-ed25519 AAAARNNzaC1lZDI1OTE5AAAAIPGDQJzIiLkq69g6lb+gpsaWL6VOHtqQbUYaePuTDCJG
 ```
 
 
-### Installation de la clé publique sur le NAS
+### Installation de la clé publique sur le NAS {#ssh-key-synology}
 
 On part ici du principe que Julie a un compte sans droits administrateur sur le 
 NAS. Si elle avait un compte administrateur, la procédure serait un peu plus 
@@ -182,7 +182,7 @@ simple, mais on préfère ici envisager le cas le plus difficile (et le plus
 sécurisé). Comme on dit, qui peut le plus peut le moins.
 
 Normalement, si on a installé proprement notre NAS et qu’on a déjà activé le 
-[service SSH](/toolbox/glossary#ssh-serveur), on dispose d’un autre utilisateur 
+[service SSH](/toolbox/glossary#ssh-server), on dispose d’un autre utilisateur 
 qui a déjà un accès SSH opérationnel et qui a les droits d’administration (on va 
 l’appeler « nico »). C’est lui qui va bosser pour ouvrir l’accès à Julie.
 
@@ -229,7 +229,7 @@ le fichier `authorized_keys` :
 $ sudo vim .ssh/authorized_keys
 ```
 - On colle dans le fichier la clé que l’on avait affichée à la fin de la section 
-[Création d’une clé](#création-dune-clé-ssh). On sauve, on sort.
+[Création d’une clé](#powershell-ssh-key). On sauve, on sort.
 - Il reste alors à ajuster le propriétaire (avec `chown`) et les permissions 
 (avec `chmod`) du dossier et du fichier (pour des explications sur la 
 signification de ces commandes, voir ici (TODO : lien interne)) :
@@ -240,7 +240,7 @@ $ sudo chmod 600 .ssh/authorized_keys
 ```
 
 
-### Modification de `/etc/passwd`
+### Modification de `/etc/passwd` {#etc-passwd-editing}
 
 > [!warning] Attention
 > Avant de modifier ce fichier, il vaut mieux en faire une copie 
@@ -269,7 +269,7 @@ Il faut faire bien attention à ne rien modifier d’autre dans le fichier. On
 sauve, on sort.
 
 
-### Test de l’accès SSH
+### Test de l’accès SSH {#ssh-test}
 
 Une fois toutes les étapes terminées, on teste l’accès depuis le laptop de 
 Julie, via PowerShell :
@@ -280,7 +280,7 @@ ssh Julie@nas.lan
 Si ça passe, on est bon. On peut initialiser le dépôt restic !
 
 
-## Initialisation du dépôt
+## Initialisation du dépôt {#restic-repo-init}
 
 Il nous faut maintenant initialiser un dépôt Restic afin d’y stocker nos 
 sauvegardes.
@@ -328,7 +328,7 @@ restic init
 ```
 
 
-## Première sauvegarde
+## Première sauvegarde {#restic-first-backup}
 
 <!--Il est temps maintenant d’effectuer une première sauvegarde des données.
 ```
