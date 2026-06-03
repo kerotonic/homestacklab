@@ -343,7 +343,7 @@ restic backup C:\Users\Julie
 
 Sanity check
 ```
-restic -r sftp:Emilie@nas:/home/Emilie/restic-backup snapshots
+restic -r sftp:Julie@nas:/home/Julie/restic-backup snapshots
 ```
 -->
 

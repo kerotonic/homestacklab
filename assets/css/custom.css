@@ -1,4 +1,4 @@
-/* CUSTOM COLORS */
+/* Site colors */
 body {
   background-color: #f5f5f5;
 }
@@ -15,7 +15,7 @@ body {
   color: rgb(var(--color-primary-400));
 }
 
-/* Titre du site dans le header */
+/* Header site title */
 .main-menu > a:first-child {
   color: rgb(var(--color-primary-600));
   font-size: 1.35rem;
@@ -26,24 +26,20 @@ body {
   color: rgb(var(--color-primary-400));
 }
 
-
+/* Articles width */
 .article-content {
   max-width: min(100%, 80ch) !important;
 }
 
-/* Listes */
-
-/* Niveau 1 : Disque plein */
+/* Lists */
 .prose ul {
     list-style-type: disc;
 }
 
-/* Niveau 2 : Cercle creux */
 .prose ul ul {
     list-style-type: circle;
 }
 
-/* Niveau 3 : Carré plein */
 .prose ul ul ul {
     list-style-type: square;
 }
