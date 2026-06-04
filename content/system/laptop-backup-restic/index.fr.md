@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-05-31"
+lastmod = "2026-06-04"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -170,7 +170,7 @@ cat .ssh\id_ed25519.pub
 ```
 
 Elle doit ressembler à :
-```
+```text
 ssh-ed25519 AAAARNNzaC1lZDI1OTE5AAAAIPGDQJzIiLkq69g6lb+gpsaWL6VOHtqQbUYaePuTDCJG Julie@laptop_2026-05-22
 ```
 
@@ -310,8 +310,9 @@ cd $HOME
 micro .restic_env.ps1
 ```
 
-3) Dans ce fichier, on copie le code suivant, en veillant à renseigner correctement 
-l’identifiant et l’adresse du serveur, et en choisissant un mot de passe.
+3) Dans ce fichier, on copie le code suivant, en veillant à renseigner 
+correctement l’identifiant et l’adresse du serveur, et en choisissant un mot de 
+passe.
 ```powershell
 $env:RESTIC_REPOSITORY="sftp:Julie@nas.lan:/home/restic-backup"
 $env:RESTIC_PASSWORD="mot-de-passe-au-choix"
@@ -336,16 +337,63 @@ restic init
 
 ## Première sauvegarde {#restic-first-backup}
 
-<!--Il est temps maintenant d’effectuer une première sauvegarde des données.
-```
-restic backup C:\Users\Julie
+Avant de lancer une première sauvegarde, quelques précisions s’imposent sur la 
+commande utilisée.
+
+Lors d'une sauvegarde d’un dossier personnel comme `C:\Users\julie`, `restic` 
+est parfois dans l’impossibilité d’accéder à certains fichiers verrouillés 
+(fichiers de cache et bases de données temporaires utilisés par des processus en 
+cours). On peut résoudre ce problème à l’aide de l’option `--use-fs-snapshot`, 
+qui permet à `restic` d’utiliser le service VSS de Windows pour obtenir un 
+instantané cohérent des fichiers à sauvegarder. À noter que cette option impose 
+d’utiliser un [shell](/toolbox/glossary#shell) en mode administrateur.
+
+En complément, on exclut quelques dossiers à l’aide de l’option `--exclude` :
+- Le dossier `$HOME\AppData\Local\Temp`, qui ne contient que des données 
+temporaires sans intérêt pour une restauration.
+- Le dossier `$HOME\AppData\Local\Microsoft\WindowsApps`, qui contient 
+principalement des alias et fichiers spéciaux recréés automatiquement par 
+Windows, et que `restic` n’est pas capable de sauvegarder.
+
+L’usage de ces options permet d'obtenir une sauvegarde sans avertissements sur 
+le poste de Julie. Il est cependant possible que sur un autre poste, `restic` 
+signale des alertes sur d’autres fichiers spécifiques. Si cela se produit, 
+rassurez-vous : ces avertissements n'empêchent pas la sauvegarde de se terminer 
+correctement. Ils s'avèrent même utiles au début pour repérer les dossiers 
+résiduels et peaufiner ses filtres avant d'automatiser la procédure.
+
+> [!tip] Conseil
+> Dans tous les cas, on peut tester la commande `restic` en ajoutant l’option 
+`--dry-run`, qui permet de voir la commande en action sans qu’elle ne touche 
+vraiment aux fichiers.
+
+Ceci étant dit, pour procéder à une première sauvegarde, on ouvre un terminal 
+PowerShell en mode administrateur et on exécute la commande suivante :
+```powershell
+restic backup $HOME `
+  --use-fs-snapshot `
+  --exclude "$HOME\AppData\Local\Temp" `
+  --exclude "$HOME\AppData\Local\Microsoft\WindowsApps"
 ```
 
-Sanity check
+Si tout va bien, en fin de procédure la commande devrait afficher un 
+compte-rendu se terminant par :
+```text
+processed 116513 files, 26.537 GiB in 46:18
+snapshot c5391e78 saved
 ```
-restic -r sftp:Julie@nas:/home/Julie/restic-backup snapshots
+
+Si on veut vraiment en avoir le cœur net, on peut utiliser la commande `restic 
+snapshots`, qui donne la liste des sauvegardes effectuées :
+```text
+repository 7246e2ee opened (version 2, compression level auto)
+ID        Time                 Host        Tags        Paths            Size
+----------------------------------------------------------------------------------
+c5391e78  2026-06-04 13:48:44  jlaptop-av              C:\Users\julie   26.537 GiB
+----------------------------------------------------------------------------------
+1 snapshots
 ```
--->
+
 
 ## Automatisation des backups
 
