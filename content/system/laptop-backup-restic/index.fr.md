@@ -368,8 +368,10 @@ résiduels et peaufiner ses filtres avant d'automatiser la procédure.
 vraiment aux fichiers.
 
 Ceci étant dit, pour procéder à une première sauvegarde, on ouvre un terminal 
-PowerShell en mode administrateur et on exécute la commande suivante :
+PowerShell en mode administrateur, on recharge les variables d’environnement et 
+on exécute `restic backup` :
 ```powershell
+. $HOME\.restic_env.ps1
 restic backup $HOME `
   --use-fs-snapshot `
   --exclude "$HOME\AppData\Local\Temp" `
