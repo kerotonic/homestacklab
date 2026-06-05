@@ -1,0 +1,4 @@
+[umamiAnalytics]
+  websiteid = "d1e1f0b3-5ec6-4865-a170-4212e52ad7f9"
+  domain = "cloud.umami.is"
+  enableTrackEvent = true
