@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-06-04"
+lastmod = "2026-06-06"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -307,7 +307,8 @@ pour pouvoir utiliser ensuite `restic` sans nous en soucier. Ce script servira
 ensuite aussi lors de la phase d’automatisation. On crée donc un script :
 ```powershell
 cd $HOME
-micro .restic_env.ps1
+mkdir .restic
+micro .restic\restic_env.ps1
 ```
 
 3) Dans ce fichier, on copie le code suivant, en veillant à renseigner 
@@ -330,7 +331,7 @@ virtuel `/home`. Le chemin `/home/restic-backup` correspond donc au dossier
 
 4) On peut maintenant initialiser le dépôt, en chargeant d’abord notre script :
 ```powershell
-. $HOME\.restic_env.ps1
+. $HOME\.restic\restic_env.ps1
 restic init
 ```
 
@@ -371,7 +372,7 @@ Ceci étant dit, pour procéder à une première sauvegarde, on ouvre un termina
 PowerShell en mode administrateur, on recharge les variables d’environnement et 
 on exécute `restic backup` :
 ```powershell
-. $HOME\.restic_env.ps1
+. $HOME\.restic\restic_env.ps1
 restic backup $HOME `
   --use-fs-snapshot `
   --exclude "$HOME\AppData\Local\Temp" `
@@ -397,6 +398,65 @@ c5391e78  2026-06-04 13:48:44  jlaptop-av              C:\Users\julie   26.537 G
 ```
 
 
-## Automatisation des backups
+## Automatisation des sauvegardes {#restic-backup-automation}
+
+### Création d’un script de sauvegarde {#restic-backup-script}
+
+Pour automatiser une sauvegarde via Restic dans Windows, il nous faut d’abord 
+créer un script PowerShell de sauvegarde :
+```powershell
+cd $HOME\.restic
+micro restic_backup.ps1
+```
+
+Voilà un modèle minimal de script que vous pouvez reprendre, améliorer et 
+peaufiner à l’aide de la [documentation 
+Restic](https://restic.readthedocs.io/en/stable/) :
+```powershell
+# Load environment
+. $HOME\.restic\restic_env.ps1
+
+# Backup
+restic backup $HOME `
+    --use-fs-snapshot `
+    --exclude "$HOME\AppData\Local\Temp" `
+    --exclude "$HOME\AppData\Local\Microsoft\WindowsApps"
+
+# Apply retention policy
+restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
+```
+
+Le script commence par charger les variables d’environnement nécessaires pour 
+que Restic travaille avec le bon répertoire, avant de procéder à une sauvegarde 
+à l’aide de la commande `restic backup`.
+
+Enfin, il utilise la commande `restic forget` afin de supprimer les anciens 
+snapshots du dépôt. L’option `--prune` permet de supprimer aussi les données 
+associées, elle est donc nécessaire pour libérer l’espace disque occupé par les 
+anciennes sauvegardes.
+
+> [!info]- Comment définir l’ancienneté des données conservées ?
+> La commande proposée dans le script conserve une sauvegarde pour chacun des 
+derniers 7 jours, une pour chacune des 4 semaines précédant les 7 jours et une 
+pour chacun des 6 mois précédant les 4 semaines. Vous pouvez adapter la 
+politique de suppression des anciennes sauvegardes à l’aide des règles suivantes 
+:
+> - `--keep-daily <X>` : Conserve une sauvegarde journalière pendant les 
+derniers `X` jours.
+> - `--keep-weekly <Y>` : Conserve une sauvegarde hebdomadaire pendant les 
+dernières `Y` semaines.
+> - `--keep-monthly <Z>` : Conserve une sauvegarde mensuelle pendant les 
+derniers `Z` mois.
+> - Vous pouvez même ajouter une règle pour des sauvegardes annuelles 
+(`--keep-yearly`) ou peaufiner davantage à l’aide des
+[nombreuses options disponibles](https://restic.readthedocs.io/en/stable/060_forget.html#removing-snapshots-according-to-a-policy).
+> - À noter que ces règles sont cumulatives. Avec la politique proposée, Restic 
+conserve les sauvegardes des 7 derniers jours, puis 4 sauvegardes hebdomadaires 
+plus anciennes, puis encore 6 sauvegardes mensuelles.
+
+
+### Comment automatiser le script sous Windows ? {#windows-backup-automation}
+
+
 
 ## Surveillance
