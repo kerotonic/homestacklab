@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-06-06"
+lastmod = "2026-06-07"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -68,13 +68,13 @@ optimise le stockage grâce à la déduplication de données qui permet des
 sauvegardes incrémentales. Il intègre également des tests de vérification 
 d’intégrité et permet des restaurations partielles ou totales.
 - **OpenSSH** : ce protocole a été préféré à SMB pour sa parfaite intégration 
-dans mon architecture existante. L'utilisation de SSH présente de nombreux 
+dans mon architecture existante. L’utilisation de SSH présente de nombreux 
 avantages pour la gestion des sauvegardes : absence de montages réseau 
-persistants, suppression des conflits d'identifiants Windows, scripts 
+persistants, suppression des conflits d’identifiants Windows, scripts 
 simplifiés, gestion des erreurs plus lisible et comportement natif de type 
 Linux.
 - **Rclone** : ce couteau suisse du stockage servira de passerelle à Restic pour 
-lui permettre d'accéder à Google Drive.
+lui permettre d’accéder à Google Drive.
 
 
 ## Prérequis {#system-prerequisites}
@@ -321,7 +321,7 @@ $env:RESTIC_PASSWORD="mot-de-passe-au-choix"
 
 > [!info]- Pour les curieux : pourquoi `/home/restic-backup` au lieu de `/home/Julie/restic-backup` ?
 > Restic accède au dépôt via le protocole SFTP. Sur DSM 7.1.1, le serveur SFTP 
-expose le répertoire personnel de l'utilisateur sous la forme d'un dossier 
+expose le répertoire personnel de l’utilisateur sous la forme d’un dossier 
 virtuel `/home`. Le chemin `/home/restic-backup` correspond donc au dossier 
 `restic-backup` situé dans le répertoire personnel de Julie.
 
@@ -338,16 +338,26 @@ restic init
 
 ## Première sauvegarde {#restic-first-backup}
 
-Avant de lancer une première sauvegarde, quelques précisions s’imposent sur la 
-commande utilisée.
+Avant de lancer une première sauvegarde, quelques explications s’imposent sur le 
+fonctionnement de Restic.
 
-Lors d'une sauvegarde d’un dossier personnel comme `C:\Users\julie`, `restic` 
-est parfois dans l’impossibilité d’accéder à certains fichiers verrouillés 
-(fichiers de cache et bases de données temporaires utilisés par des processus en 
-cours). On peut résoudre ce problème à l’aide de l’option `--use-fs-snapshot`, 
-qui permet à `restic` d’utiliser le service VSS de Windows pour obtenir un 
-instantané cohérent des fichiers à sauvegarder. À noter que cette option impose 
-d’utiliser un [shell](/toolbox/glossary#shell) en mode administrateur.
+Contrairement à une simple copie de fichiers, Restic fonctionne par *snapshots*, 
+c’est-à-dire qu’il réalise un instantané de vos données à un instant donné. 
+Chaque nouvelle sauvegarde ne transfère ensuite que les données nouvelles ou 
+modifiées, ce qui permet de réaliser des sauvegardes incrémentales. On bénéficie 
+ainsi d’un historique complet des sauvegardes tout en limitant fortement 
+l’espace disque utilisé et le volume de données transférées. La première 
+sauvegarde est donc généralement beaucoup plus longue que les suivantes, puisque 
+l’ensemble des données doit être copié une première fois.
+
+Il faut savoir également que lors d’une sauvegarde d’un dossier personnel comme 
+`C:\Users\julie`, `restic` est parfois dans l’impossibilité d’accéder à certains 
+fichiers verrouillés (fichiers de cache et bases de données temporaires utilisés 
+par des processus en cours). On peut résoudre ce problème à l’aide de l’option 
+`--use-fs-snapshot`, qui permet à `restic` d’utiliser le service VSS de Windows 
+pour obtenir un instantané cohérent des fichiers à sauvegarder. À noter que 
+cette option impose d’utiliser un [shell](/toolbox/glossary#shell) en mode 
+administrateur.
 
 En complément, on exclut quelques dossiers à l’aide de l’option `--exclude` :
 - Le dossier `$HOME\AppData\Local\Temp`, qui ne contient que des données 
@@ -356,12 +366,12 @@ temporaires sans intérêt pour une restauration.
 principalement des alias et fichiers spéciaux recréés automatiquement par 
 Windows, et que `restic` n’est pas capable de sauvegarder.
 
-L’usage de ces options permet d'obtenir une sauvegarde sans avertissements sur 
+L’usage de ces options permet d’obtenir une sauvegarde sans avertissements sur 
 le poste de Julie. Il est cependant possible que sur un autre poste, `restic` 
 signale des alertes sur d’autres fichiers spécifiques. Si cela se produit, 
-rassurez-vous : ces avertissements n'empêchent pas la sauvegarde de se terminer 
-correctement. Ils s'avèrent même utiles au début pour repérer les dossiers 
-résiduels et peaufiner ses filtres avant d'automatiser la procédure.
+rassurez-vous : ces avertissements n’empêchent pas la sauvegarde de se terminer 
+correctement. Ils s’avèrent même utiles au début pour repérer les dossiers 
+résiduels et peaufiner ses filtres avant d’automatiser la procédure.
 
 > [!tip] Conseil
 > Dans tous les cas, on peut tester la commande `restic` en ajoutant l’option 
@@ -430,7 +440,7 @@ Le script commence par charger les variables d’environnement nécessaires pour
 que Restic travaille avec le bon répertoire, avant de procéder à une sauvegarde 
 à l’aide de la commande `restic backup`.
 
-Enfin, il utilise la commande `restic forget` afin de supprimer les anciens 
+Ensuite, il utilise la commande `restic forget` afin de supprimer les anciens 
 snapshots du dépôt. L’option `--prune` permet de supprimer aussi les données 
 associées, elle est donc nécessaire pour libérer l’espace disque occupé par les 
 anciennes sauvegardes.
@@ -455,8 +465,70 @@ conserve les sauvegardes des 7 derniers jours, puis 4 sauvegardes hebdomadaires
 plus anciennes, puis encore 6 sauvegardes mensuelles.
 
 
-### Comment automatiser le script sous Windows ? {#windows-backup-automation}
+### Automatisation de la sauvegarde {#windows-backup-automation}
 
+Pour automatiser la sauvegarde Restic sous Windows, nous écrivons un script 
+PowerShell chargé d’enregistrer la tâche dans le Planificateur de tâches Windows 
+(Task Scheduler) :
+```powershell
+cd $HOME\.restic
+micro install_sched_task.ps1
+```
 
+Voilà un exemple de script permettant d’automatiser la tâche :
+```powershell
+$Script = "$HOME\.restic\restic_backup.ps1"
+
+$Action = New-ScheduledTaskAction `
+  -Execute "pwsh.exe" `
+  -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$Script`""
+
+$Trigger = New-ScheduledTaskTrigger `
+  -Daily `
+  -At 21:00
+
+$Principal = New-ScheduledTaskPrincipal `
+  -UserId "$env:USERNAME" `
+  -LogonType S4U `
+  -RunLevel Highest
+
+$Settings = New-ScheduledTaskSettingsSet `
+  -AllowStartIfOnBatteries `
+  -DontStopIfGoingOnBatteries `
+  -StartWhenAvailable `
+  -ExecutionTimeLimit (New-TimeSpan -Hours 4)
+
+Register-ScheduledTask `
+  -TaskName "ResticBackup" `
+  -Action $Action `
+  -Trigger $Trigger `
+  -Principal $Principal `
+  -Settings $Settings `
+  -Description "Daily restic backup to NAS"
+```
+
+Ce script crée une tâche automatisée qui exécute `restic_backup.ps1` chaque jour 
+à 21h00. Quelques remarques sur les choix de ce script :
+- Le mode `S4U` permet à la tâche de s’exécuter avec les droits de l’utilisateur 
+sans stocker son mot de passe. La tâche continue donc de fonctionner même si le 
+mot de passe de l’utilisateur est modifié.
+- La sauvegarde se produit aussi bien lorsque le laptop est alimenté par secteur 
+que par batterie (`-AllowStartIfOnBatteries` et 
+`-DontStopIfGoingOnBatteries`). Cela peut être modifié si on souhaite 
+économiser au maximum l’utilisation de la batterie.
+- Dans tous les cas, l’option `-StartWhenAvailable` garantit que la sauvegarde 
+se fasse dès que possible dans le cas où l’état du laptop ne le permettait pas 
+auparavant (si, notamment, il était éteint).
+- Le processus de sauvegarde ne peut excéder une durée de 4 heures 
+(`-ExecutionTimeLimit (New-TimeSpan -Hours 4)`) afin d’éviter d’avoir un 
+processus bloqué indéfiniment dans le cas où il y aurait un problème. Cette 
+limite est très largement suffisante sur le poste de Julie puisque la première 
+sauvegarde (la seule qui copie l’ensemble des données) a duré environ 45m pour 
+26Go. Bien sûr elle peut être adaptée selon les configurations techniques.
+
+<!--
+Comment activer
+Expliquer que exécuter=enregistrer
+On peut faire une série de tests…-->
 
 ## Surveillance
