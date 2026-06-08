@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-06-07"
+lastmod = "2026-06-08"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -374,7 +374,7 @@ correctement. Ils s’avèrent même utiles au début pour repérer les dossiers
 résiduels et peaufiner ses filtres avant d’automatiser la procédure.
 
 > [!tip] Conseil
-> Dans tous les cas, on peut tester la commande `restic` en ajoutant l’option 
+> Dans le doute, on peut tester la commande `restic` en ajoutant l’option 
 `--dry-run`, qui permet de voir la commande en action sans qu’elle ne touche 
 vraiment aux fichiers.
 
@@ -465,7 +465,7 @@ conserve les sauvegardes des 7 derniers jours, puis 4 sauvegardes hebdomadaires
 plus anciennes, puis encore 6 sauvegardes mensuelles.
 
 
-### Automatisation de la sauvegarde {#windows-backup-automation}
+### Création d’un script d’automatisation {#restic-automation-script}
 
 Pour automatiser la sauvegarde Restic sous Windows, nous écrivons un script 
 PowerShell chargé d’enregistrer la tâche dans le Planificateur de tâches Windows 
@@ -510,12 +510,13 @@ Register-ScheduledTask `
 Ce script crée une tâche automatisée qui exécute `restic_backup.ps1` chaque jour 
 à 21h00. Quelques remarques sur les choix de ce script :
 - Le mode `S4U` permet à la tâche de s’exécuter avec les droits de l’utilisateur 
-sans stocker son mot de passe. La tâche continue donc de fonctionner même si le 
-mot de passe de l’utilisateur est modifié.
+sans stocker son mot de passe. La tâche continue donc de fonctionner même si 
+l’utilisateur modifie son mot de passe.
 - La sauvegarde se produit aussi bien lorsque le laptop est alimenté par secteur 
-que par batterie (`-AllowStartIfOnBatteries` et 
-`-DontStopIfGoingOnBatteries`). Cela peut être modifié si on souhaite 
-économiser au maximum l’utilisation de la batterie.
+que par batterie (`-AllowStartIfOnBatteries` et `-DontStopIfGoingOnBatteries`). 
+Cela peut être modifié si on souhaite économiser au maximum l’utilisation de la 
+batterie. En les supprimant, Windows n’exécutera la tâche que lorsque 
+l’ordinateur sera alimenté sur secteur.
 - Dans tous les cas, l’option `-StartWhenAvailable` garantit que la sauvegarde 
 se fasse dès que possible dans le cas où l’état du laptop ne le permettait pas 
 auparavant (si, notamment, il était éteint).
@@ -524,11 +525,68 @@ auparavant (si, notamment, il était éteint).
 processus bloqué indéfiniment dans le cas où il y aurait un problème. Cette 
 limite est très largement suffisante sur le poste de Julie puisque la première 
 sauvegarde (la seule qui copie l’ensemble des données) a duré environ 45m pour 
-26Go. Bien sûr elle peut être adaptée selon les configurations techniques.
+26Go. Bien sûr, elle peut être adaptée selon les configurations techniques.
 
-<!--
-Comment activer
-Expliquer que exécuter=enregistrer
-On peut faire une série de tests…-->
+### Activation de la tâche planifiée {#enable-scheduled-task}
+
+Pour enregistrer la nouvelle tâche dans le Planificateur Windows à partir du 
+script, il suffit d’exécuter ce dernier dans PowerShell (mode administrateur) :
+```powershell
+cd $HOME\.restic
+.\install_sched_task.ps1
+```
+
+On peut vérifier que le script est bien enregistré à l’aide de :
+```powershell
+Get-ScheduledTask -TaskName ResticBackup
+```
+
+On peut également tester un lancement immédiat de la tâche :
+```powershell
+Start-ScheduledTask -TaskName ResticBackup
+```
+
+Après quoi, il est utile de vérifier l’état du dernier run de la tâche :
+```powershell
+Get-ScheduledTaskInfo -TaskName ResticBackup
+```
+
+Ce qui retournera un résultat de ce type :
+```text
+LastRunTime        : 07/06/2026 22:26:49
+LastTaskResult     : 0
+NextRunTime        : 08/06/2026 21:00:00
+NumberOfMissedRuns : 0
+TaskName           : ResticBackup
+TaskPath           : 
+PSComputerName     : 
+```
+
+Ici, `LastRunTime` nous permet de confirmer que la tâche vient effectivement 
+d’être accomplie et la valeur de `LastTaskResult` (=0) confirme que le processus 
+s’est terminé sans erreurs. Enfin, `NextRunTime` montre que la prochaine 
+occurrence interviendra à 21h00 le jour suivant, ce qui est cohérent avec la 
+politique définie.
+
+À ce point, autant jeter un œil à l’état du dépôt via `restic snapshots` :
+```text
+repository 7246e2ee opened (version 2, compression level auto)
+ID        Time                 Host        Tags        Paths            Size
+----------------------------------------------------------------------------------
+c5391e78  2026-06-04 13:48:44  jlaptop-av              C:\Users\julie   26.537 GiB
+7784e7dc  2026-06-07 22:26:49  jlaptop-av              C:\Users\julie   26.698 GiB
+----------------------------------------------------------------------------------
+2 snapshots
+```
+
+BOOM !
+
+Tout va bien, voilà un nouveau snapshot qui vient s’ajouter au précédent. En 
+comparant les valeurs de la colonne `Size`, on constate que le second snapshot 
+contient environ 160 Mo de données supplémentaires par rapport au premier. Cela 
+correspond aux fichiers ajoutés ou modifiés entre les deux sauvegardes.
+
+
+## Rclone et Google Drive
 
 ## Surveillance
