@@ -7,10 +7,6 @@ draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
 
-<!-- TODO/ADDITIONS
-- poursuivre rédaction : rclone / google drive ?
-- chercher à automatiser mises à jour des outils -->
-
 > [!note] Note
 > Article en cours d’élaboration.
 
@@ -586,7 +582,66 @@ comparant les valeurs de la colonne `Size`, on constate que le second snapshot
 contient environ 160 Mo de données supplémentaires par rapport au premier. Cela 
 correspond aux fichiers ajoutés ou modifiés entre les deux sauvegardes.
 
+> [!info]- Pour les curieux qui veulent vérifier que les données sont bien là !
+> La présence d'un snapshot est déjà un excellent indicateur, mais il est 
+possible d'aller plus loin avec quelques commandes simples permettant d’afficher 
+le contenu des sauvegardes :
+>
+> - `restic ls c5391e78` : Pour parcourir le contenu du snapshot `c5391e78`.
+> - `restic ls latest` : Pour parcourir le contenu du dernier snapshot.
+> - `restic find "exemple.txt" --snapshot latest` : Pour vérifier la présence ou chercher le chemin complet du fichier `exemple.txt`.
+> - `restic find "\C\Users\julie\Documents" --snapshot latest` : Pour vérifier le contenu du dossier personnel `Documents`.
+>
+> On peut bien sûr aussi immédiatement tester une restauration totale des 
+données vers un dossier de test de la manière suivante :
+> ```powershell
+> cd $HOME
+> mkdir restore-test
+> restic restore latest --target restore-test
+> ```
+> 
+> Plus simplement, on peut aussi juste tenter de restaurer un dossier ou un 
+fichier en ajoutant l’option `--include` :
+> ```powershell
+> restic restore latest `
+>   --target restore-test `
+>   --include "/C/Users/julie/Documents/blabla/blibli.PDF"
+> ```
+> Notez que cette opération restaure dans `$HOME\restore-test\` l’arborescence 
+complète du fichier (`C:\Users\julie\Documents\blabla\blibli.PDF`), tout en 
+préservant les attributs des fichiers et dossiers. Il se trouve que certains de 
+ces dossiers ont l’attribut `readonly` (c’est le cas de `Users\` et 
+`Documents\`). Pour effacer tout le dossier de test sans difficultés on peut 
+utiliser :
+> ```powershell
+> Remove-Item $HOME\restore-test\ -Recurse -Force
+> ```
 
-## Rclone et Google Drive
+
+## Rclone et Google Drive {#rclone-gdrive-backup}
+
+Il est maintenant temps de mettre en place une sauvegarde complémentaire vers le 
+compte Google Drive de Julie via Rclone, ce qui permettra de mieux sécuriser ses 
+données.
+
+### Installation et configuration de Rclone
+
+Pour installer Rclone, on ouvre PowerShell en mode administrateur et on passe 
+par `winget` :
+```powershell
+winget install Rclone.Rclone --scope machine
+```
+
+<!-- TODO/ADDITIONS
+- passage winget pour restic
+- rédaction partie rclone+gdrive (le reste)
+- supprimer repo GD+software Perfect Backup
+- revoir structuration titres autour de ssh+nas / rclone+gdrive
+- mise en place procédure surveillance (restic check ?)+option mail -->
+
+
+### Initialisation du dépot et première sauvegarde
+
+### Automatisation de la sauvegarde
 
 ## Surveillance
