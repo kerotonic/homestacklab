@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-06-08"
+lastmod = "2026-06-11"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -92,37 +92,17 @@ exemple)
 
 ## Installation de Restic {#restic-installation-windows}
 
-Pour installer Restic sur Windows, on trouve la dernière version sur la page « 
-Releases » du [dépôt GitHub](https://github.com/restic/restic/releases). Dans la 
-dernière release, il faut repérer la section « Assets » et télécharger le 
-fichier nommé `restic_<version>_windows_amd64.zip`.
-
-> [!important] Important
-> Pour la suite du document, il faut adapter les noms d’utilisateur, chemins et 
-versions à votre configuration.
-
-Une fois Restic téléchargé, voilà la marche à suivre :
-- On ouvre un terminal PowerShell (ou un explorateur de fichiers si on préfère) 
-pour faire les manipulations nécessaires.
-- On crée un dossier `C:\Tools\restic` et on s’y rend :
+Pour installer Restic sur Windows, le plus simple est d’utiliser l’utilitaire de 
+gestion de paquets de Windows, WinGet. On ouvre une instance de PowerShell en 
+mode administrateur puis on installe Restic :
 ```powershell
-mkdir C:\Tools\restic
-cd C:\Tools\restic
-```
-- On déplace l’archive téléchargée vers ce dossier puis on extrait le fichier 
-exécutable de l’archive :
-```powershell
-Move-Item -Path "C:\Users\julie\Downloads\restic_0.18.1_windows_amd64.zip" `
-  -Destination .
-Expand-Archive -Path ".\restic_0.18.1_windows_amd64.zip" `
-  -DestinationPath .
-```
-- On renomme ce fichier en `restic.exe`, ce qui sera utile pour la phase 
-d’automatisation :
-```powershell
-Rename-Item -Path ".\restic_0.18.1_windows_amd64.exe" -NewName "restic.exe"
+winget install restic.restic --scope machine
 ```
 
+On vérifie ensuite que l’exécutable est bien installé et accessible :
+```powershell
+restic version
+```
 
 ## Accès SSH au NAS {#nas-ssh-access}
 
@@ -583,14 +563,16 @@ contient environ 160 Mo de données supplémentaires par rapport au premier. Cel
 correspond aux fichiers ajoutés ou modifiés entre les deux sauvegardes.
 
 > [!info]- Pour les curieux qui veulent vérifier que les données sont bien là !
-> La présence d'un snapshot est déjà un excellent indicateur, mais il est 
-possible d'aller plus loin avec quelques commandes simples permettant d’afficher 
+> La présence d’un snapshot est déjà un excellent indicateur, mais il est 
+possible d’aller plus loin avec quelques commandes simples permettant d’afficher 
 le contenu des sauvegardes :
 >
 > - `restic ls c5391e78` : Pour parcourir le contenu du snapshot `c5391e78`.
 > - `restic ls latest` : Pour parcourir le contenu du dernier snapshot.
-> - `restic find "exemple.txt" --snapshot latest` : Pour vérifier la présence ou chercher le chemin complet du fichier `exemple.txt`.
-> - `restic find "\C\Users\julie\Documents" --snapshot latest` : Pour vérifier le contenu du dossier personnel `Documents`.
+> - `restic find "exemple.txt" --snapshot latest` : Pour vérifier la présence ou 
+chercher le chemin complet du fichier `exemple.txt`.
+> - `restic find "\C\Users\julie\Documents" --snapshot latest` : Pour vérifier 
+le contenu du dossier personnel `Documents`.
 >
 > On peut bien sûr aussi immédiatement tester une restauration totale des 
 données vers un dossier de test de la manière suivante :
@@ -624,7 +606,7 @@ Il est maintenant temps de mettre en place une sauvegarde complémentaire vers l
 compte Google Drive de Julie via Rclone, ce qui permettra de mieux sécuriser ses 
 données.
 
-### Installation et configuration de Rclone
+### Installation et configuration de Rclone (#rclone-installation-windows)
 
 Pour installer Rclone, on ouvre PowerShell en mode administrateur et on passe 
 par `winget` :
@@ -632,8 +614,13 @@ par `winget` :
 winget install Rclone.Rclone --scope machine
 ```
 
-<!-- TODO/ADDITIONS
-- passage winget pour restic
+On vérifie ensuite que l’exécutable est bien installé et accessible :
+```powershell
+rclone version
+```
+
+<!-- TODO
+- faire le ménage dans le PATH (mode GUI)
 - rédaction partie rclone+gdrive (le reste)
 - supprimer repo GD+software Perfect Backup
 - revoir structuration titres autour de ssh+nas / rclone+gdrive
