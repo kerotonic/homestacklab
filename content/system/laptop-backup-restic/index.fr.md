@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-06-11"
+lastmod = "2026-06-17"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -11,8 +11,7 @@ tags = ["system", "restic", "backup", "windows"]
 > Article en cours d’élaboration.
 
 > **Logiciels utilisés :**
-> - **Client :** Windows 11 Famille, PowerShell 7.6, OpenSSH 9.5p2
-> - **Outils :** Restic 0.18.1, Rclone 1.66.0 (TODO : recheck)
+> - **Client :** Windows 11 Famille, PowerShell 7.6, OpenSSH 9.5p2, Restic 0.18.1
 > - **Serveur :** Synology DS213j (DSM v7.1.1)
 
 &nbsp;
@@ -36,7 +35,8 @@ sur une sauvegarde m’en a découragé.
 J’ai alors décidé d’aller vers des solutions davantage orientées open source, 
 avec l’idée d’avoir quelque chose de solide et (surtout) automatisable pour 
 pouvoir (enfin) cesser d’y penser. Je vous présente ici les solutions que j’ai 
-construites.
+construites pour sécuriser les données de ma femme — qu’on appellera 
+désormais ici « Julie ».
 
 
 ## Stratégie de sauvegarde {#backup-strategy}
@@ -45,32 +45,31 @@ Tout d’abord, on va rappeler une règle basique de la sauvegarde personnelle.
 Idéalement, un système de backup sérieux doit suivre la règle du « 3-2-1 » : 
 pour être en sécurité, vos données doivent exister au moins en trois copies, sur 
 au moins deux supports différents, dont l’un au moins se trouve hors site. Pour 
-les données du laptop, j’ai opté pour une double sauvegarde incrémentale : une 
-sur notre NAS familial (un Synology DS213j) et une sur Google Drive où ma femme 
-— qu’on appellera désormais ici « Julie » — dispose d’un espace de stockage de 
-100 Go.
+les données du laptop, j’ai opté pour deux sauvegardes incrémentales 
+complémentaires :
+- Une sauvegarde locale sur notre NAS familial (un Synology DS213j).
+- Une sauvegarde distante sur [Backblaze.com](https://www.backblaze.com/), un 
+stockage en ligne connu de la communauté du logiciel libre, qui propose des 
+tarifs intéressants tout en permettant un accès réseau facilité pour les 
+logiciels de sauvegarde présentés ici.
 
-Pour les logiciels, j’ai longuement exploré les options disponibles. Exit les 
-gros GUI gourmands en ressources. Étant allergique au clavier non-bépo de Julie 
-et par souci d’efficacité, je voulais un outil que je puisse administrer à 
-distance depuis mon poste, via une connexion SSH. J’aurais pu utiliser Borg, 
-outil réputé et fiable, comme je le fais pour la plupart de mes sauvegardes 
-personnelles, mais ce n’était pas possible sur Google Drive (ou tout autre 
-hébergeur de stockage mainstream que Julie pourrait utiliser). J’ai alors opté 
+Pour les logiciels justement, j’ai longuement exploré les options disponibles. 
+Exit les gros GUI gourmands en ressources. Étant allergique au clavier non-bépo 
+de Julie et par souci d’efficacité, je voulais un outil que je puisse 
+administrer à distance depuis mon poste, via une connexion SSH. J’ai alors opté 
 pour les solutions suivantes :
 - **Restic** : un outil en ligne de commande open source à la réputation solide. 
-Il se prête facilement à une automatisation via des scripts PowerShell et 
-optimise le stockage grâce à la déduplication de données qui permet des 
-sauvegardes incrémentales. Il intègre également des tests de vérification 
-d’intégrité et permet des restaurations partielles ou totales.
-- **OpenSSH** : ce protocole a été préféré à SMB pour sa parfaite intégration 
-dans mon architecture existante. L’utilisation de SSH présente de nombreux 
+Disponible nativement sous Windows, il se prête facilement à une 
+automatisation via des scripts PowerShell. Il optimise le stockage grâce à la 
+déduplication de données qui permet des sauvegardes incrémentales. Il intègre 
+également des tests de vérification d’intégrité et permet des restaurations 
+partielles ou totales.
+- **OpenSSH** : pour la communication avec le NAS, ce protocole a été préféré à 
+SMB pour sa parfaite intégration dans mon architecture système basée 
+principalement sur Arch Linux. L’utilisation de SSH présente de nombreux 
 avantages pour la gestion des sauvegardes : absence de montages réseau 
 persistants, suppression des conflits d’identifiants Windows, scripts 
-simplifiés, gestion des erreurs plus lisible et comportement natif de type 
-Linux.
-- **Rclone** : ce couteau suisse du stockage servira de passerelle à Restic pour 
-lui permettre d’accéder à Google Drive.
+simplifiés, gestion des erreurs plus claire.
 
 
 ## Prérequis {#system-prerequisites}
@@ -284,7 +283,7 @@ ensuite aussi lors de la phase d’automatisation. On crée donc un script :
 ```powershell
 cd $HOME
 mkdir .restic
-micro .restic\restic_env.ps1
+micro .restic\restic_env_local.ps1
 ```
 
 3) Dans ce fichier, on copie le code suivant, en veillant à renseigner 
@@ -307,7 +306,7 @@ virtuel `/home`. Le chemin `/home/restic-backup` correspond donc au dossier
 
 4) On peut maintenant initialiser le dépôt, en chargeant d’abord notre script :
 ```powershell
-. $HOME\.restic\restic_env.ps1
+. $HOME\.restic\restic_env_local.ps1
 restic init
 ```
 
@@ -358,7 +357,7 @@ Ceci étant dit, pour procéder à une première sauvegarde, on ouvre un termina
 PowerShell en mode administrateur, on recharge les variables d’environnement et 
 on exécute `restic backup` :
 ```powershell
-. $HOME\.restic\restic_env.ps1
+. $HOME\.restic\restic_env_local.ps1
 restic backup $HOME `
   --use-fs-snapshot `
   --exclude "$HOME\AppData\Local\Temp" `
@@ -392,7 +391,7 @@ Pour automatiser une sauvegarde via Restic dans Windows, il nous faut d’abord
 créer un script PowerShell de sauvegarde :
 ```powershell
 cd $HOME\.restic
-micro restic_backup.ps1
+micro restic_backup_local.ps1
 ```
 
 Voilà un modèle minimal de script que vous pouvez reprendre, améliorer et 
@@ -400,7 +399,7 @@ peaufiner à l’aide de la [documentation
 Restic](https://restic.readthedocs.io/en/stable/) :
 ```powershell
 # Load environment
-. $HOME\.restic\restic_env.ps1
+. $HOME\.restic\restic_env_local.ps1
 
 # Backup
 restic backup $HOME `
@@ -448,12 +447,12 @@ PowerShell chargé d’enregistrer la tâche dans le Planificateur de tâches Wi
 (Task Scheduler) :
 ```powershell
 cd $HOME\.restic
-micro install_sched_task.ps1
+micro install_sched_task_local.ps1
 ```
 
 Voilà un exemple de script permettant d’automatiser la tâche :
 ```powershell
-$Script = "$HOME\.restic\restic_backup.ps1"
+$Script = "$HOME\.restic\restic_backup_local.ps1"
 
 $Action = New-ScheduledTaskAction `
   -Execute "pwsh.exe" `
@@ -475,7 +474,7 @@ $Settings = New-ScheduledTaskSettingsSet `
   -ExecutionTimeLimit (New-TimeSpan -Hours 4)
 
 Register-ScheduledTask `
-  -TaskName "ResticBackup" `
+  -TaskName "ResticBackupLocal" `
   -Action $Action `
   -Trigger $Trigger `
   -Principal $Principal `
@@ -483,7 +482,7 @@ Register-ScheduledTask `
   -Description "Daily restic backup to NAS"
 ```
 
-Ce script crée une tâche automatisée qui exécute `restic_backup.ps1` chaque jour 
+Ce script crée une tâche automatisée qui exécute `restic_backup_local.ps1` chaque jour 
 à 21h00. Quelques remarques sur les choix de ce script :
 - Le mode `S4U` permet à la tâche de s’exécuter avec les droits de l’utilisateur 
 sans stocker son mot de passe. La tâche continue donc de fonctionner même si 
@@ -509,7 +508,7 @@ Pour enregistrer la nouvelle tâche dans le Planificateur Windows à partir du
 script, il suffit d’exécuter ce dernier dans PowerShell (mode administrateur) :
 ```powershell
 cd $HOME\.restic
-.\install_sched_task.ps1
+.\install_sched_task_local.ps1
 ```
 
 On peut vérifier que le script est bien enregistré à l’aide de :
@@ -600,29 +599,31 @@ utiliser :
 > ```
 
 
-## Rclone et Google Drive {#rclone-gdrive-backup}
+## Sauvegarde distante sur Backblaze.com {#restic-remote-backup}
 
-Il est maintenant temps de mettre en place une sauvegarde complémentaire vers le 
-compte Google Drive de Julie via Rclone, ce qui permettra de mieux sécuriser ses 
-données.
+Il est maintenant temps de mettre en place une sauvegarde complémentaire vers un 
+stockage distant, ce qui permettra de mieux sécuriser les données de Julie.
 
-### Installation et configuration de Rclone (#rclone-installation-windows)
+### Création du dépôt {#create-remote-repo}
 
-Pour installer Rclone, on ouvre PowerShell en mode administrateur et on passe 
-par `winget` :
-```powershell
-winget install Rclone.Rclone --scope machine
-```
+Bien sûr, il nous faut avant tout ouvrir un compte sur un site de stockage en 
+ligne (par exemple [OVH](https://www.ovhcloud.com/), 
+[IDrive](https://www.idrive.com/) ou 
+[Scaleway](https://www.scaleway.com/)). 
+Je propose ici une procédure basée sur l’offre 
+[B2 de Backblaze.com](https://www.backblaze.com/sign-up/cloud-storage), choisie 
+en raison du tarif calibré à la taille de la sauvegarde, de la parfaite 
+intégration de Restic et de la réputation de cette solution au sein de la 
+communauté. Il vous faut bien sûr adapter la procédure qui suit à l’hébergeur 
+que vous avez retenu.
 
-On vérifie ensuite que l’exécutable est bien installé et accessible :
-```powershell
-rclone version
-```
+- auth key
+- création fichier env
+- initialisation repo
 
 <!-- TODO
-- faire le ménage dans le PATH (mode GUI)
-- rédaction partie rclone+gdrive (le reste)
-- supprimer repo GD+software Perfect Backup
+- rédaction partie remote avec BackBlaze
+- supprimer repo GD+software Perfect Backup+résilier Google Drive
 - revoir structuration titres autour de ssh+nas / rclone+gdrive
 - mise en place procédure surveillance (restic check ?)+option mail -->
 
