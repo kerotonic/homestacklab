@@ -2,7 +2,7 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-06-17"
+lastmod = "2026-07-01"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
@@ -398,7 +398,7 @@ Voilà un modèle minimal de script que vous pouvez reprendre, améliorer et
 peaufiner à l’aide de la [documentation 
 Restic](https://restic.readthedocs.io/en/stable/) :
 ```powershell
-# Load environment
+# Initialize environment
 . $HOME\.restic\restic_env_local.ps1
 
 # Backup
@@ -479,7 +479,7 @@ Register-ScheduledTask `
   -Trigger $Trigger `
   -Principal $Principal `
   -Settings $Settings `
-  -Description "Daily restic backup to NAS"
+  -Description "Daily Restic backup to NAS"
 ```
 
 Ce script crée une tâche automatisée qui exécute `restic_backup_local.ps1` chaque jour 
@@ -513,17 +513,19 @@ cd $HOME\.restic
 
 On peut vérifier que le script est bien enregistré à l’aide de :
 ```powershell
-Get-ScheduledTask -TaskName ResticBackup
+Get-ScheduledTask -TaskName ResticBackupLocal
 ```
 
 On peut également tester un lancement immédiat de la tâche :
 ```powershell
-Start-ScheduledTask -TaskName ResticBackup
+Start-ScheduledTask -TaskName ResticBackupLocal
 ```
 
-Après quoi, il est utile de vérifier l’état du dernier run de la tâche :
+La sauvegarde s’exécute en arrière-plan. Une fois la tâche terminée (ce qui peut 
+prendre quelques dizaines de secondes ou davantage selon le volume de données), 
+on peut vérifier l’état du dernier run de la tâche :
 ```powershell
-Get-ScheduledTaskInfo -TaskName ResticBackup
+Get-ScheduledTaskInfo -TaskName ResticBackupLocal
 ```
 
 Ce qui retournera un résultat de ce type :
@@ -539,9 +541,10 @@ PSComputerName     :
 
 Ici, `LastRunTime` nous permet de confirmer que la tâche vient effectivement 
 d’être accomplie et la valeur de `LastTaskResult` (=0) confirme que le processus 
-s’est terminé sans erreurs. Enfin, `NextRunTime` montre que la prochaine 
-occurrence interviendra à 21h00 le jour suivant, ce qui est cohérent avec la 
-politique définie.
+s’est terminé sans erreurs. À noter que si cette valeur renvoie 267009, cela 
+signifie que la tâche est toujours en cours d’exécution. Enfin, `NextRunTime` 
+montre que la prochaine occurrence interviendra à 21h00 le jour suivant, ce qui 
+est cohérent avec la politique définie.
 
 À ce point, autant jeter un œil à l’état du dépôt via `restic snapshots` :
 ```text
@@ -599,7 +602,7 @@ utiliser :
 > ```
 
 
-## Sauvegarde distante sur Backblaze.com {#restic-remote-backup}
+## Sauvegarde distante {#restic-remote-backup}
 
 Il est maintenant temps de mettre en place une sauvegarde complémentaire vers un 
 stockage distant, ce qui permettra de mieux sécuriser les données de Julie.
@@ -612,24 +615,173 @@ ligne (par exemple [OVH](https://www.ovhcloud.com/),
 [Scaleway](https://www.scaleway.com/)). 
 Je propose ici une procédure basée sur l’offre 
 [B2 de Backblaze.com](https://www.backblaze.com/sign-up/cloud-storage), choisie 
-en raison du tarif calibré à la taille de la sauvegarde, de la parfaite 
-intégration de Restic et de la réputation de cette solution au sein de la 
-communauté. Il vous faut bien sûr adapter la procédure qui suit à l’hébergeur 
-que vous avez retenu.
+pour [les raisons exposées plus haut](#backup-strategy). Il vous faut bien sûr 
+adapter la procédure qui suit à l’hébergeur que vous avez retenu.
 
-- auth key
-- création fichier env
-- initialisation repo
+Une fois ouvert un compte, la première chose à faire est de créer un « bucket » 
+pour les sauvegardes en allant dans la section 
+[Buckets](https://secure.backblaze.com/b2_buckets.htm) et en cliquant sur « 
+Create a Bucket ». Pour cette utilisation, les options par défaut conviennent :
+
+{{< screenshot
+  src="images/backblaze-create-bucket.png"
+  alt="Bucket creation example"
+>}}
+
+Ensuite, nous créons une clé d’accès dédiée à Restic. Pour cela, il faut aller 
+dans la section « Application Keys » du menu de gauche, puis sélectionner « Add 
+a new Application Key ». On veille à associer la clé au bucket ciblé :
+
+{{< screenshot
+  src="images/backblaze-create-appkey.png"
+  alt="Application key creation example"
+>}}
+
+Au bout du processus, Backblaze affichera une « keyID » et « ApplicationKey ». 
+Ils ne seront affichés qu’une seule fois à la création, il est donc important de 
+les noter ou sauvegarder dans votre gestionnaire de mots de passe préféré.
+
+On peut ensuite créer un nouveau script permettant de charger les variables 
+d’environnement Restic pour le dépôt Backblaze, sur le même principe que pour le 
+NAS :
+```powershell
+cd $HOME
+micro .restic\restic_env_remote.ps1
+```
+
+Dans ce fichier, on copie le code suivant, en veillant à renseigner le nom du « 
+bucket » (ici `jlaptop-restic`) et les valeurs de `keyID` et `ApplicationKey` 
+(qui permettent à Restic d’accéder à Backblaze), puis en choisissant un mot de 
+passe destiné à chiffrer le dépôt Restic :
+```powershell
+$env:RESTIC_REPOSITORY = "b2:jlaptop-restic"
+$env:B2_ACCOUNT_ID = "004e84f858838cf0000000003"
+$env:B2_ACCOUNT_KEY = "K003duGzV03UdZRx5KmcrhQV8pdgxFB"
+$env:RESTIC_PASSWORD = "mot-de-passe-au-choix"
+```
+
+### Initialisation du dépôt {#init-remote-repo}
+
+Pour l’initialisation du dépôt, on continue de suivre la procédure définie pour 
+le NAS. On charge d’abord notre script :
+```powershell
+. $HOME\.restic\restic_env_remote.ps1
+restic init
+```
+
+On peut alors lancer une première sauvegarde depuis un terminal PowerShell 
+ouvert en mode administrateur. On exécute `restic backup` avec les options qui 
+vont bien et que nous avions déjà discutées [ici](#restic-first-backup) :
+```powershell
+restic backup $HOME `
+  --use-fs-snapshot `
+  --exclude "$HOME\AppData\Local\Temp" `
+  --exclude "$HOME\AppData\Local\Microsoft\WindowsApps"
+```
+
+On vérifie enfin qu’on a bien un nouveau snapshot :
+```powershell
+restic snapshots
+```
+
+### Automatisation de la sauvegarde {#remote-backup-automation}
+
+Pour automatiser une sauvegarde vers Backblaze avec Restic, on reprend là aussi 
+[la procédure déjà suivie](#restic-backup-automation) avec quelques adaptations. 
+Il nous faut d’abord créer un script PowerShell de sauvegarde :
+```powershell
+cd $HOME\.restic
+micro restic_backup_remote.ps1
+```
+
+Voilà un modèle minimal que vous pouvez adapter à vos besoins :
+```powershell
+# Initialize environment
+. $HOME\.restic\restic_env_remote.ps1
+
+# Backup
+restic backup $HOME `
+    --use-fs-snapshot `
+    --exclude "$HOME\AppData\Local\Temp" `
+    --exclude "$HOME\AppData\Local\Microsoft\WindowsApps"
+
+# Apply retention policy
+restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
+```
+
+Nous écrivons ensuite le script PowerShell chargé d’enregistrer la tâche dans le 
+Planificateur de tâches :
+```powershell
+micro install_sched_task_remote.ps1
+```
+
+Voilà un exemple de script permettant d’automatiser la tâche :
+```powershell
+$Script = "$HOME\.restic\restic_backup_remote.ps1"
+
+$Action = New-ScheduledTaskAction `
+  -Execute "pwsh.exe" `
+  -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$Script`""
+
+$Trigger = New-ScheduledTaskTrigger `
+  -Daily `
+  -At 22:00
+
+$Principal = New-ScheduledTaskPrincipal `
+  -UserId "$env:USERNAME" `
+  -LogonType S4U `
+  -RunLevel Highest
+
+$Settings = New-ScheduledTaskSettingsSet `
+  -AllowStartIfOnBatteries `
+  -DontStopIfGoingOnBatteries `
+  -StartWhenAvailable `
+  -ExecutionTimeLimit (New-TimeSpan -Hours 4)
+
+Register-ScheduledTask `
+  -TaskName "ResticBackupRemote" `
+  -Action $Action `
+  -Trigger $Trigger `
+  -Principal $Principal `
+  -Settings $Settings `
+  -Description "Daily Restic backup to remote storage"
+```
+
+Ce script reprend la logique du [précédent script de 
+sauvegarde](#restic-automation-script) mais décale le processus à 22h afin 
+d’éviter que les deux sauvegardes ne s’exécutent simultanément.
+
+Une fois le script préparé, on enregistre la nouvelle tâche dans le 
+Planificateur via PowerShell en mode administrateur :
+```powershell
+.\install_sched_task_remote.ps1
+```
+
+On vérifie que le script est bien enregistré :
+```powershell
+Get-ScheduledTask -TaskName ResticBackupRemote
+```
+
+On teste un lancement immédiat de la tâche :
+```powershell
+Start-ScheduledTask -TaskName ResticBackupRemote
+```
+
+[Comme précédemment](#enable-scheduled-task), on fait quelques vérifications 
+d’usage via ces deux commandes :
+```powershell
+Get-ScheduledTaskInfo -TaskName ResticBackupRemote
+restic snapshots
+```
+
+Et hop ! Désormais, nous disposons d’une seconde sauvegarde vers un stockage 
+distant, ce qui ajoute une couche de sécurité supplémentaire aux données de 
+Julie.
+
+## Surveillance
 
 <!-- TODO
 - rédaction partie remote avec BackBlaze
 - supprimer repo GD+software Perfect Backup+résilier Google Drive
 - revoir structuration titres autour de ssh+nas / rclone+gdrive
 - mise en place procédure surveillance (restic check ?)+option mail -->
-
-
-### Initialisation du dépot et première sauvegarde
-
-### Automatisation de la sauvegarde
-
-## Surveillance
