@@ -2,16 +2,13 @@
 title = "Restic : comment j’automatise la sauvegarde du laptop de Madame"
 #title = "How do I automatically backup my wife’s laptop with restic"
 date = "2026-05-10"
-lastmod = "2026-07-01"
+lastmod = "2026-07-11"
 draft = false
 tags = ["system", "restic", "backup", "windows"]
 +++
 
-> [!note] Note
-> Article en cours d’élaboration.
-
 > **Logiciels utilisés :**
-> - **Client :** Windows 11 Famille, PowerShell 7.6, OpenSSH 9.5p2, Restic 0.18.1
+> - **Client :** Windows 11 Famille, PowerShell 7.6, OpenSSH 9.5p2, Restic 0.19.0
 > - **Serveur :** Synology DS213j (DSM v7.1.1)
 
 &nbsp;
@@ -89,7 +86,9 @@ directement depuis le poste de travail avec son éditeur favori (Vim, par
 exemple)
 
 
-## Installation de Restic {#restic-installation-windows}
+## Mise en place de la sauvegarde locale {#restic-local-backup}
+
+### Installation de Restic {#restic-installation-windows}
 
 Pour installer Restic sur Windows, le plus simple est d’utiliser l’utilitaire de 
 gestion de paquets de Windows, WinGet. On ouvre une instance de PowerShell en 
@@ -103,7 +102,7 @@ On vérifie ensuite que l’exécutable est bien installé et accessible :
 restic version
 ```
 
-## Accès SSH au NAS {#nas-ssh-access}
+### Accès SSH au NAS {#nas-ssh-access}
 
 Restic communiquera avec le NAS en passant par une connexion SSH, il faut donc 
 que l’utilisateur Julie ait un accès autorisé. Par ailleurs, il faut que cet 
@@ -111,7 +110,7 @@ accès puisse se faire via une [clé SSH](/toolbox/glossary#ssh-key), ce qui est
 obligatoire pour automatiser la sauvegarde.
 
 
-### Création d’une clé SSH {#powershell-ssh-key}
+#### Création d’une clé SSH {#ssh-key-creation}
 
 Pour créer une clé SSH sur le laptop, on ouvre un terminal PowerShell depuis la 
 session de Julie, on s’assure qu’on est dans le bon dossier (`C:\Users\julie`) 
@@ -150,7 +149,7 @@ ssh-ed25519 AAAARNNzaC1lZDI1OTE5AAAAIPGDQJzIiLkq69g6lb+gpsaWL6VOHtqQbUYaePuTDCJG
 ```
 
 
-### Installation de la clé publique sur le NAS {#ssh-key-synology}
+#### Installation de la clé publique sur le NAS {#ssh-key-installation}
 
 On part ici du principe que Julie a un compte sans droits administrateur sur le 
 NAS où on veut installer la clé. Si elle avait un compte administrateur, la 
@@ -200,13 +199,13 @@ considérant que sur le NAS, les dossiers `home` se trouvent dans
 $ cd /var/services/homes/Julie/
 $ sudo mkdir -p .ssh
 ```
-- Avec [Vim](/toolbox/vim-survival-guide), on crée (ou ouvre, s’il existe déjà) 
-le fichier `authorized_keys` :
+- Avec l’éditeur [Vim](/toolbox/vim-survival-guide), on crée (ou ouvre, s’il 
+existe déjà) le fichier `authorized_keys` :
 ```bash
 $ sudo vim .ssh/authorized_keys
 ```
 - On colle dans le fichier la clé que l’on avait affichée à la fin de la section 
-[Création d’une clé](#powershell-ssh-key). On sauve, on sort.
+[Création d’une clé](#ssh-key-creation). On sauve, on sort.
 - Il reste alors à ajuster le propriétaire (avec `chown`) et les permissions 
 (avec `chmod`) du dossier et du fichier (pour des explications sur la 
 signification de ces commandes, voir ici (TODO : lien interne)) :
@@ -217,7 +216,7 @@ $ sudo chmod 600 .ssh/authorized_keys
 ```
 
 
-### Modification de `/etc/passwd` {#etc-passwd-editing}
+#### Modification de `/etc/passwd` {#etc-passwd-editing}
 
 Par défaut, sur certains NAS Synology (mon DS213j, en tout cas), le fichier 
 `/etc/passwd` interdit à un utilisateur non administrateur d’avoir accès à un 
@@ -250,7 +249,7 @@ Il faut faire bien attention à ne rien modifier d’autre dans le fichier. On
 sauve, on sort.
 
 
-### Test de l’accès SSH {#ssh-test}
+#### Test de l’accès SSH {#testing-ssh-access}
 
 Une fois toutes les étapes terminées, on teste l’accès depuis le laptop de 
 Julie, via PowerShell :
@@ -261,7 +260,7 @@ ssh Julie@nas.lan
 Si ça passe, on est bon. On peut initialiser le dépôt restic !
 
 
-## Initialisation du dépôt {#restic-repo-init}
+### Initialisation du dépôt Restic {#restic-repo-init}
 
 Il nous faut maintenant initialiser un dépôt Restic sur le NAS afin d’y stocker 
 nos sauvegardes.
@@ -311,7 +310,7 @@ restic init
 ```
 
 
-## Première sauvegarde {#restic-first-backup}
+### Première sauvegarde {#restic-first-backup}
 
 Avant de lancer une première sauvegarde, quelques explications s’imposent sur le 
 fonctionnement de Restic.
@@ -383,7 +382,7 @@ c5391e78  2026-06-04 13:48:44  jlaptop-av              C:\Users\julie   26.537 G
 ```
 
 
-## Automatisation des sauvegardes {#restic-backup-automation}
+## Automatisation des sauvegardes locales {#restic-backup-automation}
 
 ### Création d’un script de sauvegarde {#restic-backup-script}
 
@@ -511,7 +510,7 @@ cd $HOME\.restic
 .\install_sched_task_local.ps1
 ```
 
-On peut vérifier que le script est bien enregistré à l’aide de :
+On peut ensuite vérifier que le script est bien enregistré à l’aide de :
 ```powershell
 Get-ScheduledTask -TaskName ResticBackupLocal
 ```
@@ -541,10 +540,10 @@ PSComputerName     :
 
 Ici, `LastRunTime` nous permet de confirmer que la tâche vient effectivement 
 d’être accomplie et la valeur de `LastTaskResult` (=0) confirme que le processus 
-s’est terminé sans erreurs. À noter que si cette valeur renvoie 267009, cela 
-signifie que la tâche est toujours en cours d’exécution. Enfin, `NextRunTime` 
-montre que la prochaine occurrence interviendra à 21h00 le jour suivant, ce qui 
-est cohérent avec la politique définie.
+s’est terminé sans erreurs. À noter que si cette dernière valeur renvoie 267009, 
+cela signifie que la tâche est toujours en cours d’exécution. Enfin, 
+`NextRunTime` montre que la prochaine occurrence interviendra à 21h00 le jour 
+suivant, ce qui est cohérent avec la politique définie.
 
 À ce point, autant jeter un œil à l’état du dépôt via `restic snapshots` :
 ```text
@@ -602,7 +601,7 @@ utiliser :
 > ```
 
 
-## Sauvegarde distante {#restic-remote-backup}
+## Renforcer la sécurité : la sauvegarde distante {#restic-remote-backup}
 
 Il est maintenant temps de mettre en place une sauvegarde complémentaire vers un 
 stockage distant, ce qui permettra de mieux sécuriser les données de Julie.
@@ -651,8 +650,9 @@ micro .restic\restic_env_remote.ps1
 
 Dans ce fichier, on copie le code suivant, en veillant à renseigner le nom du « 
 bucket » (ici `jlaptop-restic`) et les valeurs de `keyID` et `ApplicationKey` 
-(qui permettent à Restic d’accéder à Backblaze), puis en choisissant un mot de 
-passe destiné à chiffrer le dépôt Restic :
+(qui permettent à Restic d’accéder à Backblaze), qui sont à affecter 
+respectivement aux variables `B2_ACCOUNT_ID` et `B2_ACCOUNT_KEY`. Enfin, on 
+choisit un mot de passe destiné à chiffrer le dépôt Restic (`RESTIC_PASSWORD`) :
 ```powershell
 $env:RESTIC_REPOSITORY = "b2:jlaptop-restic"
 $env:B2_ACCOUNT_ID = "004e84f858838cf0000000003"
@@ -778,10 +778,11 @@ Et hop ! Désormais, nous disposons d’une seconde sauvegarde vers un stockag
 distant, ce qui ajoute une couche de sécurité supplémentaire aux données de 
 Julie.
 
+<!-- TODO
 ## Surveillance
+-->
 
 <!-- TODO
-- rédaction partie remote avec BackBlaze
 - supprimer repo GD+software Perfect Backup+résilier Google Drive
-- revoir structuration titres autour de ssh+nas / rclone+gdrive
-- mise en place procédure surveillance (restic check ?)+option mail -->
+- mise en place procédure surveillance (restic check ?)+option mail
+- quelle solution pour automatiser update packages utilisés ? -->
